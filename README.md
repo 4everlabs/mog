@@ -2,9 +2,9 @@
 
 <div align="center">
 
-## the ultimate harness for marketing and growth analysis
+# the ultimate harness for marketing and growth analysis
 
-**The future of AI-powered marketing automation built with end-to-end TypeScript type safety.**
+*The future of AI-powered marketing automation built with end-to-end TypeScript type safety.*
 
 [![bun](https://img.shields.io/badge/bun-1.3.11-fffeaa?logo=bun&style=for-the-badge)](https://bun.com)
 [![4ever](https://img.shields.io/badge/4ever.ai-v1.0-7C3AED?style=for-the-badge)](https://4ever.ai)
