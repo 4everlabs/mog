@@ -2,7 +2,7 @@
 
 <div align="center">
 
-# Marketing Agent
+# the ultimate marketing agent
 
 [![bun](https://img.shields.io/badge/bun-1.3.11-fffeaa?logo=bun&style=for-the-badge)](https://bun.com)
 [![4ever](https://img.shields.io/badge/4ever.ai-v1.0-7C3AED&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHJlY3QgeD0iMiIgeT0iMiIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiByeD0iMiIgcnk9IjIiIGZpbGw9IiM3QzNBRUQiLz48L3N2Zz4=&style=for-the-badge)](https://4ever.ai)
