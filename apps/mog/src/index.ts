@@ -1,6 +1,10 @@
 export * from './models/twitter.ts';
 export * from './interfaces/tool.ts';
+export * from './schema/tools.ts';
+export * from './tools/types.ts';
 export { TwitterFeedTool } from './tools/twitter-feed.ts';
+export { TwitterFeedStorage } from './tools/twitter-storage.ts';
+export { TwitterFeedManager } from './tools/twitter-manager.ts';
+export { TwitterIntegrationClient } from './integrations/twitter/client.ts';
 export { ToolPool, ToolRegistry } from './tools/pool.ts';
-export { createTwitterFeedRegistry, TwitterFeedManager } from './tools/twitter-manager.ts';
-export type { PoolStats } from './tools/pool.ts';
+export { listRegisteredTools, getRegisteredTool, resolveEnabledTools, executeTool, buildToolSummaries } from './tools/registry.ts';

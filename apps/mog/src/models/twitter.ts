@@ -36,4 +36,5 @@ export interface PooledToolConfig {
   twitterHandle: string;
   autoRefresh?: boolean;
   refreshIntervalMs?: number;
+  storagePath?: string;
 }

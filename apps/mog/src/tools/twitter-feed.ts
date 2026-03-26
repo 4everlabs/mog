@@ -41,6 +41,10 @@ export class TwitterFeedTool implements PoolableTool {
     return this._isAcquired;
   }
 
+  setCacheDuration(ms: number): void {
+    this.cacheDurationMs = ms;
+  }
+
   constructor(poolConfig: PooledToolConfig) {
     this.poolId = poolConfig.id;
     this.twitterHandle = poolConfig.twitterHandle;
@@ -77,6 +81,13 @@ export class TwitterFeedTool implements PoolableTool {
 
   async update(): Promise<void> {
     await this.fetchFeed();
+  }
+
+  async refreshFeed(): Promise<TwitterFeed> {
+    this.cacheDurationMs = 0;
+    await this.fetchFeed();
+    this.cacheDurationMs = 60000;
+    return this.feed!;
   }
 
   async getFeed(): Promise<TwitterFeed> {

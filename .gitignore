@@ -51,3 +51,6 @@ public/*.png
 
 # Finder (MacOS) folder config
 .DS_Store
+
+# Runtime data (generated, not committed)
+.runtime
