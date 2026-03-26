@@ -2,7 +2,7 @@
 
 <div align="center">
 
-# the ultimate marketing agent
+## the ultimate harness for marketing and growth analysis
 
 **The future of AI-powered marketing automation built with end-to-end TypeScript type safety.**
 
