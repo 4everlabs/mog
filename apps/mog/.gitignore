@@ -11,7 +11,8 @@ coverage
 *.lcov
 
 # logs
-*.log
+logs
+_.log
 report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # dotenv environment variable files
@@ -22,29 +23,9 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .env.local
 
 # caches
-.eslintcache
+.oxlintcache
 .cache
 *.tsbuildinfo
-.oxlintcache
-
-# Turborepo
-.turbo
-turbo.json
-
-# Logs
-*.log
-
-# Local env files
-.env
-.env.*
-!.env.example
-
-# oxlint
-oxlintrc.json
-
-# Public assets
-public/*.png
-!public/logo.png
 
 # IntelliJ based IDEs
 .idea

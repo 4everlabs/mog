@@ -1,0 +1,22 @@
+{
+  "name": "@mog/core",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun run index.ts",
+    "build": "bun build index.ts --outdir dist",
+    "check": "oxlint",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@mog/types": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "oxlint": "^0.15.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

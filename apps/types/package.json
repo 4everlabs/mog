@@ -1,0 +1,8 @@
+{
+  "name": "@mog/types",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "main": "./index.ts",
+  "module": "./index.ts"
+}
