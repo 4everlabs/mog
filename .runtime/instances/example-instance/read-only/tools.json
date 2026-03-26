@@ -4,5 +4,11 @@
     "autoRefresh": true,
     "refreshIntervalMs": 3600000,
     "defaultLimit": 20
+  },
+  "rss": {
+    "enabled": true,
+    "autoRefresh": true,
+    "refreshIntervalMs": 3600000,
+    "defaultLimit": 20
   }
 }

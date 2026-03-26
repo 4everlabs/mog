@@ -1,0 +1,15 @@
+{
+  "toolName": "research_refresh_source",
+  "executedAt": "2026-03-26T22:39:04.747Z",
+  "input": {
+    "sourceId": "storyworth-google-alert",
+    "force": true
+  },
+  "output": {
+    "success": true,
+    "sourceId": "storyworth-google-alert",
+    "newEntriesFound": 0,
+    "totalCached": 3,
+    "lastUpdated": "2026-03-26T22:39:04.746Z"
+  }
+}

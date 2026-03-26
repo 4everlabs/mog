@@ -1,0 +1,54 @@
+{
+  "toolName": "research_read_source",
+  "executedAt": "2026-03-26T22:39:04.748Z",
+  "input": {
+    "sourceId": "storyworth-google-alert",
+    "limit": 2
+  },
+  "output": {
+    "success": true,
+    "source": {
+      "id": "storyworth-google-alert",
+      "provider": "rss",
+      "title": "Storyworth Google Alert",
+      "sourceUrl": "https://www.google.com/alerts/feeds/11780457456973594295/16131467136740592611",
+      "feedTitle": "Google Alert - storyworth",
+      "siteUrl": "https://www.google.com/alerts/feeds/11780457456973594295/16131467136740592611",
+      "kind": "atom",
+      "tags": [
+        "competitor",
+        "google-alert",
+        "storyworth"
+      ]
+    },
+    "entries": [
+      {
+        "id": "tag:google.com,2013:googlealerts/feed:13733296337645483655",
+        "sourceId": "storyworth-google-alert",
+        "provider": "rss",
+        "title": "A dog-gone good story worth retelling - Gulf Breeze News",
+        "summary": "A dog-gone good story worth retelling Did you see the recent story about the seven dogs who escaped their captor and found their way back home?",
+        "content": "A dog-gone good story worth retelling Did you see the recent story about the seven dogs who escaped their captor and found their way back home?",
+        "publishedAt": "2026-03-26T18:06:44.000Z",
+        "updatedAt": "2026-03-26T18:06:44.000Z",
+        "url": "https://news.gulfbreezenews.com/articles/a-dog-gone-good-story-worth-retelling/",
+        "sourceUrl": "https://www.google.com/url?rct=j&sa=t&url=https://news.gulfbreezenews.com/articles/a-dog-gone-good-story-worth-retelling/&ct=ga&cd=CAIyGjUwZGYyYTU4NGI1NGE2YzM6Y29tOmVuOlVT&usg=AOvVaw1EKlbovB_Led5T16dkk2S5"
+      },
+      {
+        "id": "tag:google.com,2013:googlealerts/feed:1268382392538481031",
+        "sourceId": "storyworth-google-alert",
+        "provider": "rss",
+        "title": "Can't Access Storyworth Stories? Expert Help & Guide - JustAnswer",
+        "summary": "Storyworth account. Web browser. Just cant find stories. Technician's Assistant chat Collapse expert assistant chat section. Customer: cant get into ...",
+        "content": "Storyworth account. Web browser. Just cant find stories. Technician's Assistant chat Collapse expert assistant chat section. Customer: cant get into ...",
+        "publishedAt": "2026-03-25T03:58:09.000Z",
+        "updatedAt": "2026-03-25T03:58:09.000Z",
+        "url": "https://www.justanswer.com/software/uqr9o-storyworth-access-all-stories-guide.html",
+        "sourceUrl": "https://www.google.com/url?rct=j&sa=t&url=https://www.justanswer.com/software/uqr9o-storyworth-access-all-stories-guide.html&ct=ga&cd=CAIyGjUwZGYyYTU4NGI1NGE2YzM6Y29tOmVuOlVT&usg=AOvVaw2T-kkd0BzvjpHJkOt9f5SI"
+      }
+    ],
+    "entryCount": 2,
+    "cached": true,
+    "lastUpdated": "2026-03-26T22:39:04.746Z"
+  }
+}

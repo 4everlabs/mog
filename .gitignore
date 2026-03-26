@@ -56,3 +56,5 @@ public/*.png
 .runtime/instances/personal-instance/
 .runtime/instances/*/storage/
 .runtime/instances/*/workspace/storage/twitter/*.jsonl
+
+_notes/

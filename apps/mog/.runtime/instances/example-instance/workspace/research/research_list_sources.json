@@ -1,0 +1,24 @@
+{
+  "toolName": "research_list_sources",
+  "executedAt": "2026-03-26T22:39:04.147Z",
+  "input": {},
+  "output": {
+    "sources": [
+      {
+        "id": "storyworth-google-alert",
+        "provider": "rss",
+        "title": "Storyworth Google Alert",
+        "sourceUrl": "https://www.google.com/alerts/feeds/11780457456973594295/16131467136740592611",
+        "hasCachedData": true,
+        "entryCount": 3,
+        "lastUpdated": "2026-03-26T22:37:54.452Z",
+        "tags": [
+          "competitor",
+          "google-alert",
+          "storyworth"
+        ]
+      }
+    ],
+    "totalSources": 1
+  }
+}

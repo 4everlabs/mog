@@ -1,0 +1,16 @@
+{
+  "toolName": "twitter_list_accounts",
+  "executedAt": "2026-03-26T22:05:53.666Z",
+  "input": {},
+  "output": {
+    "accounts": [
+      {
+        "username": "Storyworth",
+        "hasCachedData": false,
+        "tweetCount": 0,
+        "lastUpdated": "2026-03-26T22:05:53.662Z"
+      }
+    ],
+    "totalAccounts": 1
+  }
+}
