@@ -26,6 +26,29 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .eslintcache
 .cache
 *.tsbuildinfo
+.oxlintcache
+
+# Turborepo
+.turbo
+turbo.json
+
+# Apps (monorepo packages)
+apps/
+
+# Logs
+*.log
+
+# Local env files
+.env
+.env.*
+!.env.example
+
+# oxlint
+oxlintrc.json
+
+# Public assets
+public/*.png
+!public/logo.png
 
 # IntelliJ based IDEs
 .idea

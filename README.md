@@ -1,15 +1,51 @@
-# mog
+![logo](public/logo.png)
 
-To install dependencies:
+<div align="center">
+
+# Marketing Agent
+
+[![bun](https://img.shields.io/badge/bun-1.3.11-fffeaa?logo=bun&style=for-the-badge)](https://bun.com)
+[![4ever](https://img.shields.io/badge/4ever.ai-v1.0-7C3AED&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHJlY3QgeD0iMiIgeT0iMiIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiByeD0iMiIgcnk9IjIiIGZpbGw9IiM3QzNBRUQiLz48L3N2Zz4=&style=for-the-badge)](https://4ever.ai)
+[![vercel](https://img.shields.io/badge/vercel-000000?logo=vercel&style=for-the-badge)](https://vercel.com)
+[![ai-sdk](https://img.shields.io/badge/ai_sdk-v0.0.1-000000?logo=ai&style=for-the-badge)](https://sdk.vercel.ai)
+[![chat-sdk](https://img.shields.io/badge/chat_sdk-v1.0-00DC82?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEyIDJjMS4xIDAgMiAuOSAyIDJzLS45IDItMiAyLTItLjktMi0yIC45LTIgMi0yem0zIDZoMmMxLjEgMCAyIC45IDIgMnM-.OSAyLTIgMi0yLS45LTItMiAuOS0yIDItMnptLTYgMTNoMnYxYzEuMSAwIDIgLjkgMiAycz-.OSAyLTIgMi0yLS45LTItMiAuOS0yIDItMnoiIGZpbGw9IiMwMERDODIiLz48L3N2Zz4=&style=for-the-badge)](https://vercel.com/docs/ai-sdk-chat)
+[![svelte](https://img.shields.io/badge/svelte-5.0-FF3E00?logo=svelte&style=for-the-badge)](https://svelte.dev)
+[![oxlint](https://img.shields.io/badge/oxlint-passing-7C3AED?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHJlY3QgeD0iNCIgeT0iNCIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiByeD0iMiIgcnk9IjIiIGZpbGw9IiM3QzNBRUQiLz48L3N2Zz4=&style=for-the-badge)](https://oxlint.com)
+
+</div>
+
+---
+
+## Overview
+
+A powerful marketing-focused AI agent built with cutting-edge technologies to automate and enhance your marketing workflows.
+
+## Features
+
+- 🤖 AI-powered marketing automation
+- 📊 Campaign management and analytics
+- 📧 Email and social media integration
+- 🎯 Audience targeting and segmentation
+
+## Tech Stack
+
+- **Runtime**: Bun
+- **Framework**: Svelte
+- **AI**: Vercel AI SDK, Vercel Chat SDK
+- **AI Model**: 4ever.ai
+- **Linting**: oxlint
+- **Deployment**: Vercel
+
+## Getting Started
 
 ```bash
+# Install dependencies
 bun install
-```
 
-To run:
-
-```bash
+# Run the agent
 bun run index.ts
 ```
 
-This project was created using `bun init` in bun v1.3.11. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+## License
+
+MIT
