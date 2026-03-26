@@ -1,0 +1,15 @@
+{
+  "mode": "propose",
+  "notifyChannels": ["cli"],
+  "channels": ["cli"],
+  "monitor": {
+    "intervalMs": 60000
+  },
+  "twitter": {
+    "enabled": true,
+    "autoRefresh": true,
+    "refreshIntervalMs": 3600000,
+    "defaultLimit": 20,
+    "accounts": ["Storyworth"]
+  }
+}

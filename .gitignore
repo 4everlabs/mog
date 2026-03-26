@@ -52,5 +52,7 @@ public/*.png
 # Finder (MacOS) folder config
 .DS_Store
 
-# Runtime data (generated, not committed)
-.runtime
+# Runtime instances
+.runtime/instances/personal-instance/
+.runtime/instances/*/storage/
+.runtime/instances/*/workspace/storage/twitter/*.jsonl
