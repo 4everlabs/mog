@@ -5,8 +5,8 @@ import { config } from "dotenv";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// From src/gateway/integrations/browser-base/ -> monorepo root is ../../../..
-const monorepoRoot = resolve(__dirname, "../../../..");
+// browser-base -> …/apps/mog -> …/apps -> monorepo root (6 levels up)
+const monorepoRoot = resolve(__dirname, "../../../../../../");
 
 function loadIfExists(path: string, override: boolean): void {
   if (!existsSync(path)) return;

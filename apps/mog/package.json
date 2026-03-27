@@ -16,6 +16,7 @@
     "type-check": "tsc --noEmit",
     "ig:research": "bun run src/gateway/integrations/browser-base/ig/run-followers-research.ts",
     "ig:public-test": "bun run src/gateway/integrations/browser-base/ig/run-followers-public-test.ts",
+    "scrape:smoke": "bun run src/gateway/integrations/browser-base/run-scrape-smoke-test.ts",
     "browserbase:verify": "bun run src/gateway/integrations/browser-base/verify-browserbase.ts"
   },
   "dependencies": {
