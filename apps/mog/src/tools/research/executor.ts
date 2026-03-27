@@ -11,6 +11,11 @@ export interface ToolExecutorConfig {
   researchService: ResearchToolServices | null;
   capabilities?: IntegrationCapabilitySnapshot;
   workspacePath?: string;
+  onExecution?: (payload: {
+    toolName: string;
+    input: unknown;
+    result: ToolExecutionResult;
+  }) => void | Promise<void>;
 }
 
 export interface ToolExecutionResult {
@@ -76,42 +81,71 @@ export class ToolExecutor {
     return filePath;
   }
 
+  private async finalizeExecution(
+    toolName: string,
+    input: unknown,
+    result: ToolExecutionResult,
+  ): Promise<ToolExecutionResult> {
+    try {
+      await this.config.onExecution?.({
+        toolName,
+        input,
+        result,
+      });
+    } catch {
+    }
+
+    return result;
+  }
+
   async execute(toolName: string, input: unknown): Promise<ToolExecutionResult> {
     const tool = getRegisteredTool(toolName);
 
     if (!tool) {
-      return { success: false, error: `Unknown tool: ${toolName}` };
+      return this.finalizeExecution(toolName, input, {
+        success: false,
+        error: `Unknown tool: ${toolName}`,
+      });
     }
 
     if (!tool.implemented) {
-      return { success: false, error: `Tool not implemented: ${toolName}` };
+      return this.finalizeExecution(toolName, input, {
+        success: false,
+        error: `Tool not implemented: ${toolName}`,
+      });
     }
 
     if (!tool.isEnabled(this.capabilities)) {
-      return { success: false, error: `Tool not enabled: ${toolName}` };
+      return this.finalizeExecution(toolName, input, {
+        success: false,
+        error: `Tool not enabled: ${toolName}`,
+      });
     }
 
     try {
       const parsedInput = tool.inputSchema.safeParse(input);
       if (!parsedInput.success) {
-        return {
+        return this.finalizeExecution(toolName, input, {
           success: false,
           error: parsedInput.error.issues.map((issue) => issue.message).join("; "),
-        };
+        });
       }
 
       if (!tool.execute) {
-        return { success: false, error: `Tool has no execute function: ${toolName}` };
+        return this.finalizeExecution(toolName, parsedInput.data, {
+          success: false,
+          error: `Tool has no execute function: ${toolName}`,
+        });
       }
 
       const rawOutput = await tool.execute(this.getToolServices(), parsedInput.data);
       const parsedOutput = tool.outputSchema.safeParse(rawOutput);
 
       if (!parsedOutput.success) {
-        return {
+        return this.finalizeExecution(toolName, parsedInput.data, {
           success: false,
           error: parsedOutput.error.issues.map((issue) => issue.message).join("; "),
-        };
+        });
       }
 
       const workspaceFile =
@@ -119,12 +153,16 @@ export class ToolExecutor {
           ? await this.writeWorkspaceArtifact(tool.name, parsedInput.data, parsedOutput.data)
           : undefined;
 
-      return { success: true, output: parsedOutput.data, workspaceFile };
+      return this.finalizeExecution(toolName, parsedInput.data, {
+        success: true,
+        output: parsedOutput.data,
+        workspaceFile,
+      });
     } catch (error) {
-      return {
+      return this.finalizeExecution(toolName, input, {
         success: false,
         error: error instanceof Error ? error.message : String(error),
-      };
+      });
     }
   }
 

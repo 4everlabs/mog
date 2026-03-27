@@ -61,6 +61,31 @@ export class Gateway implements GatewaySurface {
         },
       },
       workspacePath: env.workspacePath,
+      onExecution: ({ toolName, input, result }) => {
+        const details: Record<string, unknown> = {
+          input,
+        };
+
+        if (result.workspaceFile) {
+          details["workspaceFile"] = result.workspaceFile;
+        }
+
+        if (!result.success && result.error) {
+          details["error"] = result.error;
+        }
+
+        if (result.success && !result.workspaceFile && result.output !== undefined) {
+          details["output"] = result.output;
+        }
+
+        this.store.addEvent({
+          kind: "tool",
+          level: result.success ? "info" : "error",
+          source: "runtime.gateway",
+          message: result.success ? `tool ${toolName} completed` : `tool ${toolName} failed`,
+          details,
+        });
+      },
     });
   }
 

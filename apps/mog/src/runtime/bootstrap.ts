@@ -19,7 +19,17 @@ export async function bootstrap(): Promise<MogRuntime> {
 
   const store = new RuntimeStore(env.storagePath);
   store.load();
-  store.setStatus("booting");
+  store.setStatus("booting", {
+    source: "runtime.bootstrap",
+    message: `bootstrapping ${env.appName}`,
+    details: {
+      instanceId: env.instanceId,
+      workspacePath: env.workspacePath,
+      channels: env.channels,
+      executionMode: env.executionMode,
+    },
+    emitWhenUnchanged: true,
+  });
 
   const twitterProvider = env.twitter.enabled
     ? new TwitterResearchProvider(undefined, env.twitter.defaultLimit, env.twitter.sources)
@@ -58,7 +68,15 @@ export async function bootstrap(): Promise<MogRuntime> {
     }
   }
 
-  store.setStatus("idle");
+  store.setStatus("idle", {
+    source: "runtime.bootstrap",
+    message: `${env.appName} runtime ready`,
+    details: {
+      channels: env.channels,
+      researchEnabled: env.researchEnabled,
+      threadCount: store.listThreads().length,
+    },
+  });
 
   return { env, store, gateway, monitorLoop, researchService };
 }

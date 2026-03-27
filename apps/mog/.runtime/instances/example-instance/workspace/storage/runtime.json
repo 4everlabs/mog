@@ -9,5 +9,127 @@
       "updatedAt": "2026-03-26T22:05:47.272Z"
     }
   ],
-  "findings": []
+  "findings": [],
+  "events": [
+    {
+      "kind": "status",
+      "level": "info",
+      "source": "runtime.bootstrap",
+      "message": "bootstrapping mog",
+      "details": {
+        "previous": "idle",
+        "next": "booting",
+        "instanceId": "example-instance",
+        "workspacePath": "/Volumes/T9/cursor/mog/apps/mog/.runtime/instances/example-instance/workspace",
+        "channels": [
+          "cli"
+        ],
+        "executionMode": "propose"
+      },
+      "id": "73eba979-115a-49fd-b383-9ed349d887f0",
+      "timestamp": "2026-03-27T04:55:14.136Z"
+    },
+    {
+      "kind": "status",
+      "level": "info",
+      "source": "runtime.bootstrap",
+      "message": "mog runtime ready",
+      "details": {
+        "previous": "booting",
+        "next": "idle",
+        "channels": [
+          "cli"
+        ],
+        "researchEnabled": true,
+        "threadCount": 1
+      },
+      "id": "4f7dcceb-1ccc-429e-b2f3-821ed3e46a25",
+      "timestamp": "2026-03-27T04:55:14.136Z"
+    },
+    {
+      "kind": "monitor",
+      "level": "info",
+      "source": "runtime.monitor",
+      "message": "monitor loop started",
+      "details": {
+        "planCount": 2,
+        "tickIntervalMs": 3600000
+      },
+      "id": "fa8ff558-3b0a-45b8-b81a-32e3e94da580",
+      "timestamp": "2026-03-27T04:55:14.136Z"
+    },
+    {
+      "kind": "status",
+      "level": "info",
+      "source": "runtime.monitor",
+      "message": "monitor tick started",
+      "details": {
+        "previous": "idle",
+        "next": "monitoring",
+        "planCount": 2
+      },
+      "id": "06749d33-d192-4f33-ab3a-d602cd39ae12",
+      "timestamp": "2026-03-27T04:55:14.136Z"
+    },
+    {
+      "kind": "system",
+      "level": "info",
+      "source": "frontend.tui",
+      "message": "open tui attached to mog runtime",
+      "details": {
+        "threadId": "10e6bbb5-2be7-490c-af35-a1b879349650",
+        "workspacePath": "/Volumes/T9/cursor/mog/apps/mog/.runtime/instances/example-instance/workspace",
+        "enabledProviders": {
+          "rss": true,
+          "twitter": true
+        }
+      },
+      "id": "158ceff3-87c9-4452-8975-f9d3312c9826",
+      "timestamp": "2026-03-27T04:55:14.137Z"
+    },
+    {
+      "kind": "monitor",
+      "level": "info",
+      "source": "runtime.monitor",
+      "message": "refreshed source Storyworth",
+      "details": {
+        "sourceId": "Storyworth",
+        "intervalMs": 3600000,
+        "success": true,
+        "newEntriesFound": 0,
+        "totalCached": 0,
+        "lastUpdated": "2026-03-27T04:55:15.903Z"
+      },
+      "id": "7b79d6b6-637b-44f3-b262-28330475eb1e",
+      "timestamp": "2026-03-27T04:55:15.903Z"
+    },
+    {
+      "kind": "monitor",
+      "level": "info",
+      "source": "runtime.monitor",
+      "message": "refreshed source storyworth-google-alert",
+      "details": {
+        "sourceId": "storyworth-google-alert",
+        "intervalMs": 3600000,
+        "success": true,
+        "newEntriesFound": 0,
+        "totalCached": 3,
+        "lastUpdated": "2026-03-27T04:55:16.603Z"
+      },
+      "id": "2dc09625-6b82-43f7-82fd-3104b5017c9d",
+      "timestamp": "2026-03-27T04:55:16.604Z"
+    },
+    {
+      "kind": "status",
+      "level": "info",
+      "source": "runtime.monitor",
+      "message": "monitor tick complete",
+      "details": {
+        "previous": "monitoring",
+        "next": "idle"
+      },
+      "id": "f4691a37-9245-406b-936f-0eb738461161",
+      "timestamp": "2026-03-27T04:55:16.610Z"
+    }
+  ]
 }

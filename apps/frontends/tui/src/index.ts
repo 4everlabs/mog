@@ -6,10 +6,16 @@ import {
   InputRenderableEvents,
   ScrollBoxRenderable,
   TextRenderable,
-  type KeyEvent,
 } from "@opentui/core";
+import { bootstrap } from "../../../mog/src/runtime/bootstrap.ts";
+import type {
+  RuntimeEvent,
+  RuntimeEventLevel,
+  Thread,
+  ThreadMessage,
+} from "../../../mog/src/runtime/store.ts";
 
-type PaneId = "chat" | "terminal";
+type PaneId = "chat" | "console";
 type ChatRole = "assistant" | "user";
 
 interface ChatMessage {
@@ -25,6 +31,12 @@ interface MessageChrome {
   borderColor: string;
   width: `${number}%`;
   alignSelf: "flex-start" | "flex-end";
+}
+
+interface ConsoleChrome {
+  label: string;
+  labelColor: string;
+  borderColor: string;
 }
 
 const tokens = {
@@ -44,24 +56,29 @@ const tokens = {
   userBubble: "#0b0b0d",
 };
 
-const terminalRowsPadding = 10;
-const terminalColsPadding = 8;
-const maxTerminalChars = 48_000;
-const esc = String.fromCharCode(27);
-const bell = String.fromCharCode(7);
-const ansiPattern = new RegExp(
-  `${esc}(?:\\][^${bell}]*(?:${bell}|${esc}\\\\)|[@-Z\\\\-_]|\\[[0-?]*[ -/]*[@-~])`,
-  "g",
-);
+const runtime = await bootstrap();
+const runtimeSurface = await runtime.gateway.bootstrap();
+const runtimeThread = runtime.store.ensureDefaultThread("cli");
+let activeThreadId = runtimeThread.id;
 
-const shellPath = process.env.SHELL ?? "/bin/zsh";
-const shellLabel = shellPath.split("/").pop() ?? shellPath;
-const shellArgs =
-  shellLabel === "zsh"
-    ? ["-f"]
-    : shellLabel === "bash"
-      ? ["--noprofile", "--norc", "-i"]
-      : [];
+if (runtime.env.twitter.enabled || runtime.env.rss.enabled) {
+  runtime.monitorLoop.start();
+}
+
+runtime.store.addEvent({
+  kind: "system",
+  level: "info",
+  source: "frontend.tui",
+  message: "open tui attached to mog runtime",
+  details: {
+    threadId: activeThreadId,
+    workspacePath: runtime.env.workspacePath,
+    enabledProviders: {
+      rss: runtime.env.rss.enabled,
+      twitter: runtime.env.twitter.enabled,
+    },
+  },
+});
 
 const renderer = await createCliRenderer({
   exitOnCtrlC: false,
@@ -360,8 +377,8 @@ composerRow.add(chatInput);
 composerFrame.add(composerLabel);
 composerFrame.add(composerRow);
 
-const terminalPanel = new BoxRenderable(renderer, {
-  id: "terminal-panel",
+const consolePanel = new BoxRenderable(renderer, {
+  id: "console-panel",
   flexGrow: 1,
   width: "50%",
   height: "100%",
@@ -373,24 +390,24 @@ const terminalPanel = new BoxRenderable(renderer, {
   borderStyle: "single",
   borderColor: tokens.border,
   onMouseDown() {
-    focusPane("terminal");
+    focusPane("console");
   },
 });
 
-const terminalMetaTop = new TextRenderable(renderer, {
-  id: "terminal-meta-top",
+const consoleMetaTop = new TextRenderable(renderer, {
+  id: "console-meta-top",
   content: "",
   fg: tokens.yellow,
 });
 
-const terminalMetaBottom = new TextRenderable(renderer, {
-  id: "terminal-meta-bottom",
+const consoleMetaBottom = new TextRenderable(renderer, {
+  id: "console-meta-bottom",
   content: "",
   fg: tokens.muted,
 });
 
-const terminalInfoRow = new BoxRenderable(renderer, {
-  id: "terminal-info-row",
+const consoleInfoRow = new BoxRenderable(renderer, {
+  id: "console-info-row",
   width: "100%",
   flexDirection: "row",
   gap: 1,
@@ -398,12 +415,12 @@ const terminalInfoRow = new BoxRenderable(renderer, {
   backgroundColor: tokens.panel,
 });
 
-terminalInfoRow.add(createChip("terminal-chip-live", "local shell", tokens.blue, tokens.border));
-terminalInfoRow.add(createChip("terminal-chip-pty", "pty linked", tokens.yellow, tokens.line));
-terminalInfoRow.add(createChip("terminal-chip-focus", "tab to focus", tokens.red, tokens.red));
+consoleInfoRow.add(createChip("console-chip-live", "mog logs", tokens.blue, tokens.border));
+consoleInfoRow.add(createChip("console-chip-tools", "tools", tokens.yellow, tokens.line));
+consoleInfoRow.add(createChip("console-chip-findings", "findings", tokens.red, tokens.red));
 
-const terminalFrame = new BoxRenderable(renderer, {
-  id: "terminal-frame",
+const consoleFrame = new BoxRenderable(renderer, {
+  id: "console-frame",
   flexGrow: 1,
   width: "100%",
   padding: 1,
@@ -413,8 +430,8 @@ const terminalFrame = new BoxRenderable(renderer, {
   borderColor: tokens.border,
 });
 
-const terminalScroll = new ScrollBoxRenderable(renderer, {
-  id: "terminal-scroll",
+const consoleScroll = new ScrollBoxRenderable(renderer, {
+  id: "console-scroll",
   flexGrow: 1,
   height: "100%",
   width: "100%",
@@ -431,18 +448,11 @@ const terminalScroll = new ScrollBoxRenderable(renderer, {
   },
 });
 
-terminalFrame.add(terminalScroll);
+consoleFrame.add(consoleScroll);
 
-const terminalText = new TextRenderable(renderer, {
-  id: "terminal-text",
-  width: "100%",
-  content: "",
-  fg: tokens.text,
-});
-
-const terminalStatus = new TextRenderable(renderer, {
-  id: "terminal-status",
-  content: "shell inactive // tab to capture keys // ctrl+q quit",
+const consoleStatus = new TextRenderable(renderer, {
+  id: "console-status",
+  content: "mog console // runtime events // findings",
   fg: tokens.muted,
 });
 
@@ -491,82 +501,33 @@ chatPanel.add(chatStreamFrame);
 chatPanel.add(chatStatus);
 chatPanel.add(composerFrame);
 
-terminalScroll.add(terminalText);
-terminalPanel.add(terminalMetaTop);
-terminalPanel.add(terminalMetaBottom);
-terminalPanel.add(terminalInfoRow);
-terminalPanel.add(terminalFrame);
-terminalPanel.add(terminalStatus);
+consolePanel.add(consoleMetaTop);
+consolePanel.add(consoleMetaBottom);
+consolePanel.add(consoleInfoRow);
+consolePanel.add(consoleFrame);
+consolePanel.add(consoleStatus);
 
 workArea.add(chatPanel);
-workArea.add(terminalPanel);
+workArea.add(consolePanel);
 
 appShell.add(chromeBar);
 appShell.add(workArea);
 appShell.add(footerBar);
 renderer.root.add(appShell);
 
-const chatMessages: ChatMessage[] = [
-  {
-    id: "assistant-welcome",
-    role: "assistant",
-    content:
-      "left side is mog chat. right side is the live local shell.",
-  },
-  {
-    id: "assistant-hint",
-    role: "assistant",
-    content:
-      "the shell styling now mirrors the website language.",
-  },
-];
+const chatMessages: ChatMessage[] = [];
 
 let activePane: PaneId = "chat";
-let terminalBuffer = "";
-let terminalClosed = false;
 let shuttingDown = false;
-let messageCounter = 0;
+let isSending = false;
 
-const decoder = new TextDecoder();
-const terminal = new Bun.Terminal({
-  cols: 80,
-  rows: 24,
-  data(_term, data) {
-    appendTerminalOutput(decoder.decode(data));
-  },
-  exit() {
-    terminalClosed = true;
-    appendTerminalOutput("\n[terminal closed]\n");
-    syncStatus();
-  },
-});
-
-const shell = Bun.spawn([shellPath, ...shellArgs], {
-  cwd: process.cwd(),
-  env: {
-    ...process.env,
-    TERM: "dumb",
-  },
-  terminal,
-  onExit(_proc, exitCode, signalCode, error) {
-    const detail = error?.message ?? (signalCode ? `signal ${signalCode}` : `exit ${exitCode ?? "?"}`);
-    appendTerminalOutput(`\n[shell ended: ${detail}]\n`);
-    terminalClosed = true;
-    syncStatus();
-  },
-});
-
-function escapeText(value: string): string {
-  return value.replace(/\r\n/g, "\n").replace(/\r/g, "");
+function getActiveThread(): Thread {
+  return runtime.store.getThread(activeThreadId)
+    ?? runtime.store.ensureDefaultThread("cli");
 }
 
-function sanitizeTerminalOutput(value: string): string {
-  return escapeText(value).replace(ansiPattern, "");
-}
-
-function appendTerminalOutput(value: string): void {
-  terminalBuffer = `${terminalBuffer}${sanitizeTerminalOutput(value)}`.slice(-maxTerminalChars);
-  terminalText.content = terminalBuffer;
+function toChatRole(role: ThreadMessage["role"]): ChatRole {
+  return role === "assistant" ? "assistant" : "user";
 }
 
 function clearChildren(scrollBox: ScrollBoxRenderable): void {
@@ -608,6 +569,96 @@ function messageChrome(role: ChatRole): MessageChrome {
   };
 }
 
+function consoleChrome(level: RuntimeEventLevel): ConsoleChrome {
+  switch (level) {
+    case "error":
+      return {
+        label: "ERR",
+        labelColor: tokens.red,
+        borderColor: tokens.red,
+      };
+    case "warning":
+      return {
+        label: "WRN",
+        labelColor: tokens.yellow,
+        borderColor: tokens.yellow,
+      };
+    case "debug":
+      return {
+        label: "DBG",
+        labelColor: tokens.muted,
+        borderColor: tokens.line,
+      };
+    default:
+      return {
+        label: "INF",
+        labelColor: tokens.blue,
+        borderColor: tokens.border,
+      };
+  }
+}
+
+function formatEventTime(value: string): string {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? value
+    : date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+}
+
+function summarizeEventDetails(event: RuntimeEvent): string | null {
+  const details = event.details;
+  if (!details) {
+    return null;
+  }
+
+  if (typeof details["workspaceFile"] === "string") {
+    return truncateMiddle(details["workspaceFile"], 48);
+  }
+
+  if (typeof details["threadId"] === "string" && typeof details["channel"] === "string") {
+    return `${details["channel"]} // ${truncateMiddle(details["threadId"], 18)}`;
+  }
+
+  if (typeof details["sourceId"] === "string" && typeof details["newEntriesFound"] === "number") {
+    return `${details["sourceId"]} // +${details["newEntriesFound"]} new`;
+  }
+
+  if (typeof details["error"] === "string") {
+    return details["error"];
+  }
+
+  if (typeof details["threadCount"] === "number") {
+    return `${details["threadCount"]} threads`;
+  }
+
+  return null;
+}
+
+function syncChatFromRuntime(): void {
+  const thread = getActiveThread();
+  chatMessages.splice(
+    0,
+    chatMessages.length,
+    ...thread.messages.map((message) => ({
+      id: message.id,
+      role: toChatRole(message.role),
+      content: message.content,
+    })),
+  );
+
+  if (chatMessages.length === 0) {
+    chatMessages.push({
+      id: "empty-state",
+      role: "assistant",
+      content: "mog runtime is live. send a message to start the cli thread.",
+    });
+  }
+}
+
 function renderChat(): void {
   clearChildren(chatScroll);
 
@@ -646,35 +697,103 @@ function renderChat(): void {
   }
 }
 
-function addChatMessage(role: ChatRole, content: string): void {
-  messageCounter += 1;
-  chatMessages.push({
-    id: `${role}-${messageCounter}`,
-    role,
-    content,
-  });
+function renderConsole(): void {
+  clearChildren(consoleScroll);
 
-  if (chatMessages.length > 40) {
-    chatMessages.splice(0, chatMessages.length - 40);
+  const events = runtime.store.listEvents().slice(-120);
+
+  for (const event of events) {
+    const chrome = consoleChrome(event.level);
+    const row = new BoxRenderable(renderer, {
+      id: `console-event-${event.id}`,
+      width: "100%",
+      flexDirection: "column",
+      marginBottom: 1,
+      paddingX: 1,
+      paddingY: 0,
+      backgroundColor: tokens.panelSoft,
+      border: true,
+      borderStyle: "single",
+      borderColor: chrome.borderColor,
+    });
+
+    const topRow = new BoxRenderable(renderer, {
+      id: `console-top-${event.id}`,
+      width: "100%",
+      flexDirection: "row",
+      gap: 1,
+      backgroundColor: tokens.panelSoft,
+    });
+
+    topRow.add(
+      new TextRenderable(renderer, {
+        id: `console-level-${event.id}`,
+        content: chrome.label,
+        fg: chrome.labelColor,
+      }),
+    );
+    topRow.add(
+      new TextRenderable(renderer, {
+        id: `console-time-${event.id}`,
+        content: formatEventTime(event.timestamp),
+        fg: tokens.muted,
+      }),
+    );
+    topRow.add(
+      new TextRenderable(renderer, {
+        id: `console-source-${event.id}`,
+        content: event.source,
+        fg: tokens.text,
+      }),
+    );
+
+    row.add(topRow);
+    row.add(
+      new TextRenderable(renderer, {
+        id: `console-message-${event.id}`,
+        content: event.message,
+        fg: tokens.text,
+      }),
+    );
+
+    const detail = summarizeEventDetails(event);
+    if (detail) {
+      row.add(
+        new TextRenderable(renderer, {
+          id: `console-detail-${event.id}`,
+          content: detail,
+          fg: tokens.muted,
+        }),
+      );
+    }
+
+    consoleScroll.add(row);
   }
+}
 
+function syncRuntimeViews(): void {
+  syncChatFromRuntime();
   renderChat();
+  renderConsole();
+  syncStatus();
 }
 
 function syncStatus(): void {
   const chatFocused = activePane === "chat";
   const compact = renderer.width < 110 || renderer.height < 28;
   const stacked = renderer.width < 70;
-  const cwdLimit = stacked ? 34 : 54;
+  const eventCount = runtime.store.listEvents().length;
+  const findingCount = runtime.store.listFindings().length;
+  const status = runtime.store.getStatus();
 
   workArea.flexDirection = stacked ? "column" : "row";
   chatPanel.width = stacked ? "100%" : "50%";
-  terminalPanel.width = stacked ? "100%" : "50%";
+  consolePanel.width = stacked ? "100%" : "50%";
 
   chatPanel.borderColor = chatFocused ? tokens.borderStrong : tokens.border;
-  terminalPanel.borderColor = chatFocused ? tokens.border : tokens.borderStrong;
+  consolePanel.borderColor = chatFocused ? tokens.border : tokens.borderStrong;
 
-  chromeMode.content = chatFocused ? "chat active" : "shell active";
+  chromeMode.content = chatFocused ? "chat active" : "console active";
   chromeMode.fg = chatFocused ? tokens.blue : tokens.red;
   chromeTagline.visible = !compact;
   chromeTagline.content = "quietly opinionated";
@@ -682,7 +801,7 @@ function syncStatus(): void {
     ? "tab switch // enter send"
     : "tab switch // enter send // ctrl+q quit";
   footerRight.visible = !compact;
-  footerRight.content = "mog session";
+  footerRight.content = `${status} // ${runtimeSurface.availableTools.length} tools`;
 
   chatHeadline.visible = !compact;
   chatAccentLine.visible = !compact;
@@ -690,32 +809,30 @@ function syncStatus(): void {
   chatChipRow.visible = !compact;
   composerLabel.visible = !compact;
   composerPromptBox.visible = !compact;
-  terminalInfoRow.visible = !compact;
-  terminalMetaBottom.visible = !compact;
+  consoleInfoRow.visible = !compact;
+  consoleMetaBottom.visible = !compact;
   chatStatus.visible = !compact;
-  terminalStatus.visible = !compact;
+  consoleStatus.visible = !compact;
 
   composerFrame.border = !compact;
   composerFrame.padding = compact ? 0 : 1;
   composerFrame.backgroundColor = compact ? tokens.panel : tokens.panelSoft;
 
   chatStatus.content = chatFocused
-    ? "chat active // enter send"
+    ? isSending
+      ? "chat active // sending..."
+      : "chat active // enter send"
     : "chat idle // tab back";
   chatStatus.fg = chatFocused ? tokens.blue : tokens.muted;
 
-  terminalStatus.content = chatFocused
-    ? "shell inactive // tab to focus"
-    : terminalClosed
-      ? "shell active // shell closed"
-      : "shell active // keys live";
-  terminalStatus.fg = chatFocused ? tokens.muted : tokens.red;
+  consoleStatus.content = chatFocused
+    ? `console idle // ${eventCount} events // ${findingCount} findings`
+    : `console active // ${eventCount} events`;
+  consoleStatus.fg = chatFocused ? tokens.muted : tokens.red;
 
-  terminalMetaTop.content = terminalClosed
-    ? `${shellLabel} offline`
-    : `${shellLabel} // pid ${shell.pid}`;
-  terminalMetaTop.fg = terminalClosed ? tokens.red : tokens.yellow;
-  terminalMetaBottom.content = truncateMiddle(process.cwd(), cwdLimit);
+  consoleMetaTop.content = `${runtime.env.appName} // ${status}`;
+  consoleMetaTop.fg = status === "error" ? tokens.red : status === "monitoring" ? tokens.yellow : tokens.blue;
+  consoleMetaBottom.content = truncateMiddle(runtime.env.workspacePath, stacked ? 34 : 54);
 }
 
 function focusPane(pane: PaneId): void {
@@ -723,38 +840,13 @@ function focusPane(pane: PaneId): void {
 
   if (pane === "chat") {
     chatInput.focus();
-    terminalScroll.blur();
+    consoleScroll.blur();
   } else {
     chatInput.blur();
-    terminalScroll.focus();
+    consoleScroll.focus();
   }
 
   syncStatus();
-}
-
-function resizeTerminal(): void {
-  const cols = Math.max(24, terminalScroll.width - terminalColsPadding);
-  const rows = Math.max(8, terminalScroll.height - terminalRowsPadding);
-  terminal.resize(cols, rows);
-  syncStatus();
-}
-
-function keyToTerminalSequence(key: KeyEvent): string | null {
-  if (key.sequence) {
-    return key.sequence;
-  }
-
-  switch (key.name) {
-    case "return":
-    case "enter":
-      return "\r";
-    case "backspace":
-      return "\u007f";
-    case "escape":
-      return "\u001b";
-    default:
-      return null;
-  }
 }
 
 async function shutdown(): Promise<void> {
@@ -763,29 +855,49 @@ async function shutdown(): Promise<void> {
   }
 
   shuttingDown = true;
-
-  if (!terminalClosed && shell.exitCode === null && !shell.killed) {
-    shell.kill("SIGTERM");
-  }
-
-  if (!terminal.closed) {
-    terminal.close();
-  }
+  runtime.store.addEvent({
+    kind: "system",
+    level: "info",
+    source: "frontend.tui",
+    message: "open tui shutting down",
+  });
+  runtime.monitorLoop.stop();
   renderer.destroy();
 }
 
-chatInput.on(InputRenderableEvents.ENTER, (value: string) => {
+chatInput.on(InputRenderableEvents.ENTER, async (value: string) => {
   const message = value.trim();
-  if (!message) {
+  if (!message || isSending) {
     return;
   }
 
-  addChatMessage("user", message);
-  addChatMessage(
-    "assistant",
-    `queued "${message}". the interface is real, but this response layer is still local placeholder text until we wire mog runtime into the left pane.`,
-  );
+  isSending = true;
+  syncStatus();
   chatInput.value = "";
+
+  try {
+    const response = await runtime.gateway.sendMessage({
+      channel: "cli",
+      threadId: activeThreadId,
+      message,
+    });
+    activeThreadId = response.thread.id;
+  } catch (error) {
+    runtime.store.addEvent({
+      kind: "system",
+      level: "error",
+      source: "frontend.tui",
+      message: "failed to send cli message",
+      details: {
+        error: error instanceof Error ? error.message : String(error),
+        input: message,
+      },
+    });
+  } finally {
+    isSending = false;
+    syncRuntimeViews();
+    chatInput.focus();
+  }
 });
 
 renderer.keyInput.on("keypress", (key) => {
@@ -797,39 +909,22 @@ renderer.keyInput.on("keypress", (key) => {
 
   if (key.name === "tab") {
     key.preventDefault();
-    focusPane(activePane === "chat" ? "terminal" : "chat");
+    focusPane(activePane === "chat" ? "console" : "chat");
     return;
   }
-
-  if (activePane !== "terminal" || terminalClosed) {
-    return;
-  }
-
-  const sequence = keyToTerminalSequence(key);
-  if (!sequence) {
-    return;
-  }
-
-  key.preventDefault();
-  terminal.write(sequence);
 });
 
 renderer.on(CliRenderEvents.RESIZE, () => {
-  resizeTerminal();
+  syncStatus();
 });
 
-renderer.on(CliRenderEvents.DESTROY, () => {
-  if (!terminalClosed && shell.exitCode === null && !shell.killed) {
-    shell.kill("SIGTERM");
-  }
-  if (!terminal.closed) {
-    terminal.close();
-  }
+runtime.store.on("change", () => {
+  syncRuntimeViews();
 });
 
-renderChat();
+syncRuntimeViews();
 focusPane("chat");
 
 setTimeout(() => {
-  resizeTerminal();
+  syncStatus();
 }, 0);

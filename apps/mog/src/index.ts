@@ -14,5 +14,6 @@ export type { MogRuntime } from "./runtime/bootstrap.ts";
 export { Gateway } from "./runtime/gateway.ts";
 export type { SendMessageParams, SendMessageResponse, GatewaySurface } from "./runtime/gateway.ts";
 export { RuntimeStore } from "./runtime/store.ts";
+export type { RuntimeEvent, RuntimeEventKind, RuntimeEventLevel, RuntimeState, Thread, ThreadMessage, Finding } from "./runtime/store.ts";
 export { MonitorLoop } from "./runtime/monitor-loop.ts";
 export * from "./runtime/config.ts";
