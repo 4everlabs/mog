@@ -4,6 +4,8 @@
 
 # the ultimate harness for marketing and growth analysis
 
+*"Do not think that I have come to bring peace to the earth; I have not come to bring peace, but a sword"*
+
 *The future of AI-powered marketing automation built with end-to-end TypeScript type safety.*
 
 [![bun](https://img.shields.io/badge/bun-1.3.11-fffeaa?logo=bun&style=for-the-badge)](https://bun.com)
@@ -17,6 +19,8 @@
 </div>
 
 ---
+
+*The future of AI-powered marketing automation built with end-to-end TypeScript type safety.*
 
 ## Why Focus Wins
 
