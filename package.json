@@ -16,5 +16,8 @@
   },
   "dependencies": {
     "zod": "^4.3.6"
+  },
+  "patchedDependencies": {
+    "@browserbasehq/stagehand@3.2.0": "patches/@browserbasehq%2Fstagehand@3.2.0.patch"
   }
 }

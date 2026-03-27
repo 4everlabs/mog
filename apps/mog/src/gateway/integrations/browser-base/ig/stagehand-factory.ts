@@ -5,13 +5,14 @@ import { getStagehandV3Options as getLLMConfig } from "./stagehand-llm.js";
 
 export function getStagehandV3Options(overrides?: Partial<V3Options>): V3Options {
   const config = getLLMConfig();
-  console.log("🔧 Using STRICT StepFun 3.5 Flash free from OpenRouter (custom llmClient)");
+  console.log("🔧 Using model:", config.model?.modelName ?? "(unset)");
 
   const base: V3Options = {
     env: "BROWSERBASE",
     apiKey: config.apiKey!,
     projectId: config.projectId!,
-    llmClient: config.llmClient,
+    experimental: config.experimental,
+    model: config.model,
     verbose: 2,
     selfHeal: true,
     serverCache: true,

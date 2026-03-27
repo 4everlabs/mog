@@ -6,11 +6,18 @@
  *
  * Override: IG_MAX_FOLLOWERS, TARGET_IG_USERNAME, IG_OUTPUT_DIR
  */
+import { config } from "dotenv";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-// Load environment variables from monorepo root
-import "../../../load-mog-env.js";
+// Load .env from monorepo root with absolute path
+const rootEnv = "/Volumes/T9/cursor/mog/.env";
+config({ path: rootEnv });
+
+console.log("✅ Loaded .env from:", rootEnv);
+console.log("BROWSERBASE_API_KEY present:", !!process.env.BROWSERBASE_API_KEY);
+console.log("OPENROUTER_API_KEY present:", !!process.env.OPENROUTER_API_KEY);
+console.log("BROWSERBASE_PROJECT_ID present:", !!process.env.BROWSERBASE_PROJECT_ID);
 
 const here = dirname(fileURLToPath(import.meta.url));
 const monorepoRoot = join(here, "../../../../../../");

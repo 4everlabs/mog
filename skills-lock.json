@@ -1,15 +1,35 @@
 {
   "version": 1,
   "skills": {
+    "codegen": {
+      "source": "vercel-labs/json-render",
+      "sourceType": "github",
+      "computedHash": "058fec9bf514a97583ce670f9d084ba8bb1aacc3f63ab2ebe6afc7dd47b7302f"
+    },
+    "core": {
+      "source": "vercel-labs/json-render",
+      "sourceType": "github",
+      "computedHash": "ee0feec2d99e508c9561455afa6697c8ce3f6ab03b5428fe671b881abb0a022f"
+    },
     "frontend-design": {
       "source": "anthropics/skills",
       "sourceType": "github",
       "computedHash": "063a0e6448123cd359ad0044cc46b0e490cc7964d45ef4bb9fd842bd2ffbca67"
     },
+    "image": {
+      "source": "vercel-labs/json-render",
+      "sourceType": "github",
+      "computedHash": "f4e8c094db4900ddf1467f8a69596fc9445136b3a62c1312831ff968451f4eb5"
+    },
     "notion-cli": {
       "source": "makenotion/skills",
       "sourceType": "github",
       "computedHash": "50be712a9311f689e2e72b5c41b1f0736d107bf205e7e79512e3fd6d28e5782b"
+    },
+    "svelte": {
+      "source": "vercel-labs/json-render",
+      "sourceType": "github",
+      "computedHash": "1f1b211c6339f49234e24e30b70e3d4214c9e8af01b7262d66dc8dbe6e1da669"
     },
     "web-design-guidelines": {
       "source": "vercel-labs/agent-skills",

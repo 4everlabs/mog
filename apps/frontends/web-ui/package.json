@@ -1,0 +1,17 @@
+{
+  "name": "web-ui",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^6.0.2"
+  },
+  "dependencies": {
+    "@json-render/core": "^0.15.0",
+    "@json-render/svelte": "^0.15.0",
+    "zod": "^4.3.6"
+  }
+}

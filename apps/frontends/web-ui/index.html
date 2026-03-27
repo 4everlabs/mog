@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Render • Adaptive Cards Surface</title>
+    <script type="module" src="./frontend.svelte"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
+        
+        :root {
+            --bg: #0a0a0a;
+            --surface: #111111;
+            --text: #f0f0f0;
+            --accent: #22c55e;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', system-ui, sans-serif;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid #222;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: var(--accent);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .panel {
+            background: var(--surface);
+            border-radius: 12px;
+            border: 1px solid #222;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .panel h2 {
+            margin-top: 0;
+            font-size: 1.1rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+        
+        .demo-area {
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1.5rem;
+            min-height: 400px;
+            background: #0a0a0a;
+            overflow: auto;
+        }
+        
+        .json-editor {
+            font-family: monospace;
+            font-size: 0.85rem;
+            background: #0a0a0a;
+            color: #ddd;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1rem;
+            height: 400px;
+            resize: none;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        button {
+            background: var(--accent);
+            color: black;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        button:hover {
+            background: #16a34a;
+            transform: translateY(-1px);
+        }
+        
+        .card-preview {
+            background: white;
+            color: black;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.3);
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .tab {
+            padding: 0.5rem 1rem;
+            background: #222;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+        }
+        
+        .tab.active {
+            background: var(--accent);
+            color: black;
+        }
+        
+        pre {
+            background: #111;
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+</body>
+</html>
