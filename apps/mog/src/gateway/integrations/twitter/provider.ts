@@ -7,13 +7,13 @@ import type {
   ResearchRefreshSourceResult,
   ResearchRegisterSourceInput,
   ResearchRegisterSourceResult,
-} from "../../tools/research/schema.ts";
+} from "../../../tools/research/schema.ts";
 import type {
   ResearchEntry,
   ResearchFeed,
   ResearchSourceConfig,
   TwitterResearchSource,
-} from "../../research/types.ts";
+} from "../../../research/types.ts";
 import { TwitterResearchStorage } from "./storage.ts";
 
 const TIMELINE_API = "https://syndication.twitter.com/srv/timeline-profile/screen-name";

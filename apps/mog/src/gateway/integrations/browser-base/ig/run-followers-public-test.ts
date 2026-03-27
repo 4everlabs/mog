@@ -9,6 +9,9 @@
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+// Load environment variables from monorepo root
+import "../../../load-mog-env.js";
+
 const here = dirname(fileURLToPath(import.meta.url));
 const monorepoRoot = join(here, "../../../../../../");
 const defaultOut = join(monorepoRoot, "test-output");

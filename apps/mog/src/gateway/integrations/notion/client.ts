@@ -1,5 +1,5 @@
 import type { IntegrationHealthView } from "@clog/types";
-import type { NotionRuntimeConfig } from "../../runtime/config.ts";
+import type { NotionRuntimeConfig } from "../../../runtime/config.ts";
 
 export class NotionIntegrationClient {
   constructor(private readonly config: NotionRuntimeConfig) {}

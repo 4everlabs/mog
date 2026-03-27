@@ -1,6 +1,6 @@
 import { readdir } from "node:fs/promises";
-import { resolveResearchProviderStoragePath } from "../../runtime/paths.ts";
-import type { ResearchEntry, ResearchFeed, ResearchSource } from "../../research/types.ts";
+import { resolveResearchProviderStoragePath } from "../../../runtime/paths.ts";
+import type { ResearchEntry, ResearchFeed, ResearchSource } from "../../../research/types.ts";
 
 export interface RssSourceMeta {
   source: Extract<ResearchSource, { provider: "rss" }>;

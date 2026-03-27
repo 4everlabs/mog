@@ -10,8 +10,8 @@ import type {
 } from "../tools/research/schema.ts";
 import type { ResearchToolServices } from "../tools/research/types.ts";
 import type { ResearchSource, ResearchSourceProvider } from "./types.ts";
-import { RssResearchProvider } from "../integrations/rss/provider.ts";
-import { TwitterResearchProvider } from "../integrations/twitter/provider.ts";
+import { RssResearchProvider } from "../gateway/integrations/rss/provider.ts";
+import { TwitterResearchProvider } from "../gateway/integrations/twitter/provider.ts";
 
 interface ResearchProviderAdapter {
   readonly provider: ResearchSourceProvider;

@@ -54,6 +54,7 @@
         "@browserbasehq/sdk": "^2.9.0",
         "@browserbasehq/stagehand": "^3.2.0",
         "@mog/types": "workspace:*",
+        "@openrouter/ai-sdk-provider": "^2.3.3",
         "ai": "^6.0.141",
         "deepmerge": "^4.3.1",
         "dotenv": "^17.3.1",
@@ -204,6 +205,8 @@
     "@mog/frontend-tui": ["@mog/frontend-tui@workspace:apps/frontends/tui"],
 
     "@mog/types": ["@mog/types@workspace:apps/types"],
+
+    "@openrouter/ai-sdk-provider": ["@openrouter/ai-sdk-provider@2.3.3", "", { "peerDependencies": { "ai": "^6.0.0", "zod": "^3.25.0 || ^4.0.0" } }, "sha512-4fVteGkVedc7fGoA9+qJs4tpYwALezMq14m2Sjub3KmyRlksCbK+WJf67NPdGem8+NZrV2tAN42A1NU3+SiV3w=="],
 
     "@opentelemetry/api": ["@opentelemetry/api@1.9.0", "", {}, "sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg=="],
 

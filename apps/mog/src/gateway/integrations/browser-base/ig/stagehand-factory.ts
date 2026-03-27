@@ -1,28 +1,17 @@
 import "../load-mog-env.js";
 import type { Stagehand, V3Options } from "@browserbasehq/stagehand";
 import { Stagehand as StagehandCtor } from "@browserbasehq/stagehand";
-import {
-  createStagehandLlmClient,
-  getStagehandAgentModelString,
-} from "./stagehand-llm.js";
-
-function requireEnv(name: string): string {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(`Missing required environment variable: ${name}`);
-  }
-  return value;
-}
+import { getStagehandV3Options as getLLMConfig } from "./stagehand-llm.js";
 
 export function getStagehandV3Options(overrides?: Partial<V3Options>): V3Options {
-  console.log("🔧 Using OpenRouter adapter via AI SDK v6");
-  console.log("🔧 Model:", getStagehandAgentModelString());
+  const config = getLLMConfig();
+  console.log("🔧 Using STRICT StepFun 3.5 Flash free from OpenRouter (custom llmClient)");
 
   const base: V3Options = {
     env: "BROWSERBASE",
-    apiKey: requireEnv("BROWSERBASE_API_KEY"),
-    projectId: requireEnv("BROWSERBASE_PROJECT_ID"),
-    llmClient: createStagehandLlmClient(),
+    apiKey: config.apiKey!,
+    projectId: config.projectId!,
+    llmClient: config.llmClient,
     verbose: 2,
     selfHeal: true,
     serverCache: true,

@@ -7,8 +7,8 @@ import type {
   ResearchRefreshSourceResult,
   ResearchRegisterSourceInput,
   ResearchRegisterSourceResult,
-} from "../../tools/research/schema.ts";
-import type { ResearchSourceConfig, RssResearchSource } from "../../research/types.ts";
+} from "../../../tools/research/schema.ts";
+import type { ResearchSourceConfig, RssResearchSource } from "../../../research/types.ts";
 import { parseRssResearchFeed } from "./parser.ts";
 import { RssResearchStorage } from "./storage.ts";
 

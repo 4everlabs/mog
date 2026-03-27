@@ -1,5 +1,5 @@
 import type { NotionTodoItem, NotionTodoStatusCount, SurfaceNotionTodoResponse } from "@clog/types";
-import type { NotionRuntimeConfig } from "../../runtime/config.ts";
+import type { NotionRuntimeConfig } from "../../../runtime/config.ts";
 
 const NOTION_VERSION = "2026-03-11";
 const QUERY_PAGE_SIZE = 100;

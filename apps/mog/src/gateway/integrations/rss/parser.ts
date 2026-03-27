@@ -1,4 +1,4 @@
-import type { ResearchEntry, ResearchFeed, ResearchSourceConfig } from "../../research/types.ts";
+import type { ResearchEntry, ResearchFeed, ResearchSourceConfig } from "../../../research/types.ts";
 
 interface AtomParseConfig {
   id: string;

@@ -1,5 +1,5 @@
-import { RssResearchProvider } from "../integrations/rss/provider.ts";
-import { TwitterResearchProvider } from "../integrations/twitter/provider.ts";
+import { RssResearchProvider } from "../gateway/integrations/rss/provider.ts";
+import { TwitterResearchProvider } from "../gateway/integrations/twitter/provider.ts";
 import { GatewayService } from "../gateway/service.ts";
 import { ResearchService } from "../research/service.ts";
 import { loadEnvironment } from "./config.ts";

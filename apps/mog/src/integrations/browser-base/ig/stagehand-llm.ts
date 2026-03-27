@@ -1,44 +1,38 @@
 /**
- * STRICT: Only StepFun 3.5 Flash free from OpenRouter.
- * No fallbacks. Uses custom llmClient to bypass Stagehand's provider list.
+ * STRICT OpenRouter adapter wiring for Vercel AI SDK v6.
+ * Only StepFun 3.5 Flash free is allowed here.
  */
-import { createOpenAI } from "@ai-sdk/openai";
-import type { Stagehand, V3Options } from "@browserbasehq/stagehand";
+import { AISdkClient } from "@browserbasehq/stagehand/lib/v3/external_clients/aisdk.js";
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 
-const BASE_URL = "https://openrouter.ai/api/v1";
-const MODEL = "stepfun/step-3.5-flash:free";
+const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
+export const STAGEHAND_OPENROUTER_MODEL = "stepfun/step-3.5-flash:free";
 
 function requireEnv(name: string): string {
-  const v = process.env[name];
-  if (v === undefined || v === "") {
+  const value = process.env[name];
+  if (!value) {
     throw new Error(`Missing required environment variable: ${name}`);
   }
-  return v;
+  return value;
 }
 
-/** Create the exact model we want */
 export function createStagehandLanguageModel() {
-  const openrouter = createOpenAI({
+  const openrouter = createOpenRouter({
     apiKey: requireEnv("OPENROUTER_API_KEY"),
-    baseURL: BASE_URL,
+    baseURL: OPENROUTER_BASE_URL,
+    compatibility: "strict",
   });
-  return openrouter(MODEL);
+
+  return openrouter.chat(STAGEHAND_OPENROUTER_MODEL);
 }
 
-/** Stagehand options with custom llmClient */
-export function getStagehandV3Options(): Partial<V3Options> {
+export function createStagehandLlmClient(): AISdkClient {
   const model = createStagehandLanguageModel();
-  return {
-    env: "BROWSERBASE" as const,
-    apiKey: requireEnv("BROWSERBASE_API_KEY"),
-    projectId: requireEnv("BROWSERBASE_PROJECT_ID"),
-    llmClient: { model },
-    verbose: 2,
-    selfHeal: true,
-    serverCache: true,
-  };
+  return new AISdkClient({
+    model: model as ConstructorParameters<typeof AISdkClient>[0]["model"],
+  });
 }
 
 export function getStagehandAgentModelString(): string {
-  return MODEL;
+  return STAGEHAND_OPENROUTER_MODEL;
 }
