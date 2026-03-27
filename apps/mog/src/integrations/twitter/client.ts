@@ -1,6 +1,5 @@
-import { TwitterFeedStorage } from "../../tools/twitter-storage.ts";
-import { TwitterFeedTool } from "../../tools/twitter-feed.ts";
-import type { TwitterToolServices } from "../../tools/types.ts";
+import { TwitterFeedTool } from "./feed.ts";
+import { TwitterFeedStorage } from "./storage.ts";
 import type {
   TwitterGetFeedInput,
   TwitterGetFeedResult,
@@ -12,7 +11,8 @@ import type {
   TwitterListAccountsResult,
   TwitterRegisterAccountInput,
   TwitterRegisterAccountResult,
-} from "../../schema/tools.ts";
+} from "./tool-schema.ts";
+import type { TwitterToolServices } from "./tool-types.ts";
 
 export class TwitterIntegrationClient implements TwitterToolServices {
   private storage: TwitterFeedStorage;
