@@ -2,9 +2,9 @@
 
 <div align="center">
 
-# The ultimate harness for marketing and growth analysis
+# The ultimate agentic harness for marketing and growth operations
 
-*"Do not think that I have come to bring peace to the earth; I have not come to bring peace, but a sword"*
+*"Do not think that I have come to bring peace to the earth; I have not come to bring peace, but a sword" -Jesus*
 
 
 
