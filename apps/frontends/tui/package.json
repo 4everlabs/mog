@@ -1,0 +1,21 @@
+{
+  "name": "@mog/frontend-tui",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "scripts": {
+    "dev": "bun run src/index.ts",
+    "check": "oxlint .",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@opentui/core": "latest"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "oxlint": "latest",
+    "typescript": "latest"
+  }
+}

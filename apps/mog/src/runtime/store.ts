@@ -44,6 +44,10 @@ export class RuntimeStore {
 
   constructor(private storagePath = resolveInstanceStoragePath()) {}
 
+  private isDefaultChannelThread(thread: Thread, channel: Thread["channel"]): boolean {
+    return thread.channel === channel && !thread.externalId && !thread.title;
+  }
+
   setStatus(status: RuntimeState["status"]): void {
     this.status = status;
     this.save();
@@ -59,6 +63,29 @@ export class RuntimeStore {
 
   getThread(id: string): Thread | null {
     return this.threads.find((thread) => thread.id === id) ?? null;
+  }
+
+  ensureDefaultThread(channel: Exclude<Thread["channel"], "system">): Thread {
+    const candidates = this.threads.filter((thread) => this.isDefaultChannelThread(thread, channel));
+    const activeThread = candidates.find((thread) => thread.messages.length > 0)
+      ?? candidates.toSorted((left, right) => left.createdAt.localeCompare(right.createdAt))[0];
+
+    const duplicateIds = new Set(
+      candidates
+        .filter((thread) => thread !== activeThread && thread.messages.length === 0)
+        .map((thread) => thread.id),
+    );
+
+    if (duplicateIds.size > 0) {
+      this.threads = this.threads.filter((thread) => !duplicateIds.has(thread.id));
+      this.save();
+    }
+
+    if (activeThread) {
+      return activeThread;
+    }
+
+    return this.createThread(channel);
   }
 
   createThread(channel: Thread["channel"], externalId?: string, title?: string): Thread {

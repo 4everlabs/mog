@@ -10,22 +10,28 @@ import {
   ResearchRegisterSourceInputSchema,
   ResearchRegisterSourceResultSchema,
 } from "./schema.ts";
-import type { IntegrationCapabilitySnapshot, RegisteredTool, ResearchToolServices } from "./types.ts";
+import type { IntegrationCapabilitySnapshot, RegisteredTool } from "./types.ts";
+
+const isResearchEnabled = (capabilities: IntegrationCapabilitySnapshot): boolean =>
+  capabilities.research?.enabled ?? false;
+
+const hasAnyResearchProvider = (capabilities: IntegrationCapabilitySnapshot): boolean =>
+  Boolean(capabilities.research?.providers?.rss || capabilities.research?.providers?.twitter);
 
 export const researchTools = [
   {
     name: "research_list_sources",
-    title: "Research List Sources",
-    description: "List all registered research sources that can be read or refreshed by the model.",
+    title: "List Available Research Sources",
+    description: "Use when you need to see which research sources are already registered and available to read or refresh.",
     integration: "research" as const,
     approvalRequired: false,
     implemented: true,
     inputSchema: ResearchListSourcesInputSchema,
     outputSchema: ResearchListSourcesResultSchema,
     isEnabled(capabilities: IntegrationCapabilitySnapshot) {
-      return capabilities.research?.enabled ?? false;
+      return isResearchEnabled(capabilities);
     },
-    execute(services: { research: ResearchToolServices | null }, input: z.infer<typeof ResearchListSourcesInputSchema>) {
+    execute(services, input: z.infer<typeof ResearchListSourcesInputSchema>) {
       if (!services.research) {
         throw new Error("Research services are unavailable");
       }
@@ -34,17 +40,17 @@ export const researchTools = [
   },
   {
     name: "research_read_source",
-    title: "Research Read Source",
-    description: "Read normalized research entries for a registered source from local cache.",
+    title: "Read Entries From One Research Source",
+    description: "Use when you already know a sourceId and need its cached research entries, metadata, and last update time.",
     integration: "research" as const,
     approvalRequired: false,
     implemented: true,
     inputSchema: ResearchReadSourceInputSchema,
     outputSchema: ResearchReadSourceResultSchema,
     isEnabled(capabilities: IntegrationCapabilitySnapshot) {
-      return capabilities.research?.enabled ?? false;
+      return isResearchEnabled(capabilities);
     },
-    execute(services: { research: ResearchToolServices | null }, input: z.infer<typeof ResearchReadSourceInputSchema>) {
+    execute(services, input: z.infer<typeof ResearchReadSourceInputSchema>) {
       if (!services.research) {
         throw new Error("Research services are unavailable");
       }
@@ -53,17 +59,17 @@ export const researchTools = [
   },
   {
     name: "research_refresh_source",
-    title: "Research Refresh Source",
-    description: "Refresh a registered research source and cache newly discovered entries.",
+    title: "Refresh One Research Source",
+    description: "Use when you need fresh entries from one registered research source and want the local cache updated.",
     integration: "research" as const,
     approvalRequired: false,
     implemented: true,
     inputSchema: ResearchRefreshSourceInputSchema,
     outputSchema: ResearchRefreshSourceResultSchema,
     isEnabled(capabilities: IntegrationCapabilitySnapshot) {
-      return capabilities.research?.enabled ?? false;
+      return isResearchEnabled(capabilities);
     },
-    execute(services: { research: ResearchToolServices | null }, input: z.infer<typeof ResearchRefreshSourceInputSchema>) {
+    execute(services, input: z.infer<typeof ResearchRefreshSourceInputSchema>) {
       if (!services.research) {
         throw new Error("Research services are unavailable");
       }
@@ -72,17 +78,17 @@ export const researchTools = [
   },
   {
     name: "research_register_source",
-    title: "Research Register Source",
-    description: "Register a new research source so it can be read and refreshed through the shared research tool surface.",
+    title: "Register A New Research Source",
+    description: "Use when you need to add a new RSS feed or Twitter/X account so future read and refresh calls can use it by sourceId.",
     integration: "research" as const,
     approvalRequired: false,
     implemented: true,
     inputSchema: ResearchRegisterSourceInputSchema,
     outputSchema: ResearchRegisterSourceResultSchema,
     isEnabled(capabilities: IntegrationCapabilitySnapshot) {
-      return capabilities.research?.enabled ?? false;
+      return isResearchEnabled(capabilities) && hasAnyResearchProvider(capabilities);
     },
-    execute(services: { research: ResearchToolServices | null }, input: z.infer<typeof ResearchRegisterSourceInputSchema>) {
+    execute(services, input: z.infer<typeof ResearchRegisterSourceInputSchema>) {
       if (!services.research) {
         throw new Error("Research services are unavailable");
       }

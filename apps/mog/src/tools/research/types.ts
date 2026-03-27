@@ -42,7 +42,7 @@ export interface RegisteredTool<TInputSchema extends ZodTypeAny = ZodTypeAny, TO
   readonly inputSchema: TInputSchema;
   readonly outputSchema: TOutputSchema;
   isEnabled(capabilities: IntegrationCapabilitySnapshot): boolean;
-  execute?(services: { research: ResearchToolServices | null }, input: unknown): Promise<unknown>;
+  execute?(services: ToolExecutionServices, input: unknown): Promise<unknown>;
 }
 
 export type AnyRegisteredTool = RegisteredTool<ZodTypeAny, ZodTypeAny>;
@@ -51,4 +51,13 @@ export interface ToolExecutionServices {
   readonly research: ResearchToolServices | null;
   readonly runtime?: Record<string, unknown> | null;
   readonly shell?: { execute: (cmd: string) => { output: string } } | null;
+}
+
+export interface ToolSummary {
+  name: string;
+  title: string;
+  description: string;
+  integration: string;
+  approvalRequired: boolean;
+  implemented: boolean;
 }

@@ -1,6 +1,11 @@
 import { mkdir } from "node:fs/promises";
 import { buildToolSummaries, getRegisteredTool } from "./registry.ts";
-import type { IntegrationCapabilitySnapshot, ResearchToolServices } from "./types.ts";
+import type {
+  IntegrationCapabilitySnapshot,
+  ResearchToolServices,
+  ToolExecutionServices,
+  ToolSummary,
+} from "./types.ts";
 
 export interface ToolExecutorConfig {
   researchService: ResearchToolServices | null;
@@ -26,6 +31,12 @@ export class ToolExecutor {
       research: config.researchService ? { enabled: true } : undefined,
     };
     this.workspacePath = config.workspacePath ?? null;
+  }
+
+  private getToolServices(): ToolExecutionServices {
+    return {
+      research: this.researchServices,
+    };
   }
 
   private sanitizeFileSegment(value: string): string {
@@ -93,7 +104,7 @@ export class ToolExecutor {
         return { success: false, error: `Tool has no execute function: ${toolName}` };
       }
 
-      const rawOutput = await tool.execute({ research: this.researchServices }, parsedInput.data);
+      const rawOutput = await tool.execute(this.getToolServices(), parsedInput.data);
       const parsedOutput = tool.outputSchema.safeParse(rawOutput);
 
       if (!parsedOutput.success) {
@@ -117,14 +128,7 @@ export class ToolExecutor {
     }
   }
 
-  listEnabledTools(): Array<{
-    name: string;
-    title: string;
-    description: string;
-    integration: string;
-    approvalRequired: boolean;
-    implemented: boolean;
-  }> {
+  listEnabledTools(): ToolSummary[] {
     return buildToolSummaries(this.capabilities);
   }
 }

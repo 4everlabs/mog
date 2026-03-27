@@ -1,5 +1,10 @@
 import { researchTools } from "./definitions.ts";
-import type { AnyRegisteredTool, IntegrationCapabilitySnapshot, ToolExecutionServices } from "./types.ts";
+import type {
+  AnyRegisteredTool,
+  IntegrationCapabilitySnapshot,
+  ToolExecutionServices,
+  ToolSummary,
+} from "./types.ts";
 
 const registeredTools: readonly AnyRegisteredTool[] = [
   ...researchTools,
@@ -19,10 +24,61 @@ export const resolveEnabledTools = (
 ): readonly AnyRegisteredTool[] =>
   registeredTools.filter((tool) => tool.implemented && tool.isEnabled(capabilities));
 
+const getEnabledResearchProviders = (capabilities: IntegrationCapabilitySnapshot): string[] => {
+  const enabledProviders: string[] = [];
+
+  if (capabilities.research?.providers?.rss) {
+    enabledProviders.push("RSS");
+  }
+
+  if (capabilities.research?.providers?.twitter) {
+    enabledProviders.push("Twitter/X");
+  }
+
+  return enabledProviders;
+};
+
+const getSummaryTitle = (
+  tool: AnyRegisteredTool,
+  capabilities: IntegrationCapabilitySnapshot,
+): string => {
+  if (tool.name !== "research_register_source") {
+    return tool.title;
+  }
+
+  const enabledProviders = getEnabledResearchProviders(capabilities);
+  if (enabledProviders.length === 0) {
+    return tool.title;
+  }
+
+  return `${tool.title} (${enabledProviders.join(" or ")})`;
+};
+
+const getSummaryDescription = (
+  tool: AnyRegisteredTool,
+  capabilities: IntegrationCapabilitySnapshot,
+): string => {
+  if (tool.name !== "research_register_source") {
+    return tool.description;
+  }
+
+  const enabledProviders = getEnabledResearchProviders(capabilities);
+  if (enabledProviders.length === 0) {
+    return tool.description;
+  }
+
+  if (enabledProviders.length === 1) {
+    return `Use when you need to add a new ${enabledProviders[0]} research source so future read and refresh calls can use it by sourceId.`;
+  }
+
+  return `Use when you need to add a new ${enabledProviders.join(" or ")} research source so future read and refresh calls can use it by sourceId.`;
+};
+
 export const executeTool = async (
   toolName: string,
   services: ToolExecutionServices,
   input: unknown,
+  capabilities?: IntegrationCapabilitySnapshot,
 ): Promise<unknown> => {
   const tool = getRegisteredTool(toolName);
   if (!tool) {
@@ -33,14 +89,16 @@ export const executeTool = async (
     throw new Error(`Tool not implemented: ${toolName}`);
   }
 
-  if (!tool.isEnabled({
+  const resolvedCapabilities = capabilities ?? {
     research: services.research ? { enabled: true } : undefined,
-  } as IntegrationCapabilitySnapshot)) {
+  };
+
+  if (!tool.isEnabled(resolvedCapabilities)) {
     throw new Error(`Tool not enabled: ${toolName}`);
   }
 
   if (tool.execute) {
-    return tool.execute({ research: services.research }, input);
+    return tool.execute(services, input);
   }
 
   throw new Error(`Tool has no execute function: ${toolName}`);
@@ -48,18 +106,11 @@ export const executeTool = async (
 
 export const buildToolSummaries = (
   capabilities: IntegrationCapabilitySnapshot,
-): Array<{
-  name: string;
-  title: string;
-  description: string;
-  integration: string;
-  approvalRequired: boolean;
-  implemented: boolean;
-}> =>
+): ToolSummary[] =>
   resolveEnabledTools(capabilities).map((tool) => ({
     name: tool.name,
-    title: tool.title,
-    description: tool.description,
+    title: getSummaryTitle(tool, capabilities),
+    description: getSummaryDescription(tool, capabilities),
     integration: tool.integration,
     approvalRequired: tool.approvalRequired,
     implemented: tool.implemented,

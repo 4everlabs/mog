@@ -1,5 +1,5 @@
-import { RssResearchProvider } from "../research/providers/rss/provider.ts";
-import { TwitterResearchProvider } from "../research/providers/twitter/provider.ts";
+import { RssResearchProvider } from "../integrations/rss/provider.ts";
+import { TwitterResearchProvider } from "../integrations/twitter/provider.ts";
 import { ResearchService } from "../research/service.ts";
 import { loadEnvironment } from "./config.ts";
 import { Gateway } from "./gateway.ts";
@@ -54,7 +54,7 @@ export async function bootstrap(): Promise<MogRuntime> {
 
   for (const channel of env.channels) {
     if (channel !== "system") {
-      store.createThread(channel as "cli" | "telegram" | "web");
+      store.ensureDefaultThread(channel as "cli" | "telegram" | "web");
     }
   }
 
