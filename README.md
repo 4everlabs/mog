@@ -171,6 +171,10 @@ Benchmarks move fast. The numbers above are drawn from public sources available 
 - [SWE-Skills-Bench: Do Agent Skills Actually Help in Real-World Software Engineering?](https://arxiv.org/abs/2603.15401)
 - [WebArena: A Realistic Web Environment for Building Autonomous Agents](https://arxiv.org/abs/2307.13854)
 
+<p align="center">
+  <img src="public/mogman.png" alt="MOG man" width="320" />
+</p>
+
 ## License
 
 MIT
