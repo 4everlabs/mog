@@ -6,4 +6,9 @@ export {
 } from "./stagehand-factory.js";
 export { ProfileScraper } from "./scraper.js";
 export { createInstagramDomAgent } from "./instagram-agent.js";
+export {
+  buildStagehandModelConfiguration,
+  createStagehandLanguageModel,
+  getStagehandAgentModelString,
+} from "./stagehand-llm.js";
 export * from "./types.js";

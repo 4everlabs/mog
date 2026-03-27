@@ -19,6 +19,7 @@
     "browserbase:verify": "bun run src/integrations/browser-base/verify-browserbase.ts"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^3.0.48",
     "@browserbasehq/sdk": "^2.9.0",
     "@browserbasehq/stagehand": "^3.2.0",
     "@mog/types": "workspace:*",

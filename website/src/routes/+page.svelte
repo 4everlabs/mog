@@ -19,7 +19,23 @@
 				<span class="terminal-shell__light terminal-shell__light--yellow"></span>
 				<span class="terminal-shell__light terminal-shell__light--blue"></span>
 			</div>
-			<p class="terminal-shell__title">mog://landing</p>
+			<div class="terminal-shell__bar-meta">
+				<p class="terminal-shell__title">mog://landing</p>
+				<a
+					class="github-link"
+					href="https://github.com/"
+					target="_blank"
+					rel="noreferrer"
+					aria-label="MOG GitHub"
+				>
+					<svg viewBox="0 0 24 24" aria-hidden="true">
+						<path
+							d="M12 1.5a10.5 10.5 0 0 0-3.32 20.46c.53.1.72-.23.72-.5v-1.94c-2.93.64-3.55-1.24-3.55-1.24-.48-1.22-1.17-1.55-1.17-1.55-.96-.66.07-.65.07-.65 1.06.08 1.62 1.08 1.62 1.08.94 1.62 2.47 1.15 3.08.88.1-.68.37-1.15.67-1.42-2.34-.27-4.8-1.17-4.8-5.23 0-1.16.41-2.1 1.08-2.84-.11-.27-.47-1.36.1-2.83 0 0 .88-.28 2.89 1.08a10.1 10.1 0 0 1 5.26 0c2.01-1.36 2.89-1.08 2.89-1.08.57 1.47.21 2.56.1 2.83.67.74 1.08 1.68 1.08 2.84 0 4.07-2.46 4.96-4.8 5.22.38.33.72.97.72 1.96v2.9c0 .28.19.61.73.5A10.5 10.5 0 0 0 12 1.5Z"
+						/>
+					</svg>
+					<span>github</span>
+				</a>
+			</div>
 		</div>
 
 		<div class="terminal-shell__body">
@@ -153,6 +169,12 @@
 		background: rgba(255, 255, 255, 0.02);
 	}
 
+	.terminal-shell__bar-meta {
+		display: flex;
+		align-items: center;
+		gap: 0.85rem;
+	}
+
 	.terminal-shell__lights {
 		display: flex;
 		gap: 0.55rem;
@@ -186,6 +208,41 @@
 		letter-spacing: 0.14em;
 		text-transform: uppercase;
 		color: var(--muted);
+	}
+
+	.github-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.45rem;
+		padding: 0.32rem 0.5rem;
+		border: 1px solid rgba(104, 181, 252, 0.18);
+		background: rgba(104, 181, 252, 0.04);
+		color: var(--blue);
+		font-size: 0.68rem;
+		font-weight: 300;
+		letter-spacing: 0.08em;
+		text-decoration: none;
+		text-transform: uppercase;
+		transition:
+			border-color 160ms ease,
+			background-color 160ms ease,
+			color 160ms ease,
+			transform 160ms ease;
+	}
+
+	.github-link svg {
+		width: 0.9rem;
+		height: 0.9rem;
+		fill: currentColor;
+	}
+
+	.github-link:hover,
+	.github-link:focus-visible {
+		border-color: rgba(224, 175, 104, 0.4);
+		background: rgba(224, 175, 104, 0.08);
+		color: var(--yellow);
+		outline: none;
+		transform: translateY(-1px);
 	}
 
 	.terminal-shell__body {
@@ -530,6 +587,14 @@
 
 		.terminal-shell__bar {
 			padding-inline: 0.85rem;
+		}
+
+		.terminal-shell__bar-meta {
+			gap: 0.6rem;
+		}
+
+		.github-link span {
+			display: none;
 		}
 
 		.command-card,

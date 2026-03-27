@@ -2,7 +2,7 @@
  * Educational / research runner: Instagram followers modal → structured extract loop.
  * Uses Stagehand v3 on Browserbase. Comply with Instagram’s Terms and applicable law.
  *
- * Env: BROWSERBASE_API_KEY, BROWSERBASE_PROJECT_ID, OPENAI_API_KEY
+ * Env: BROWSERBASE_API_KEY, BROWSERBASE_PROJECT_ID, OPENROUTER_API_KEY
  * Optional: TARGET_IG_USERNAME (or IG_TARGET), IG_MAX_FOLLOWERS,
  *   IG_SKIP_LOGIN=1 — no credential or manual login; go straight to the profile (anonymous session).
  *   INSTAGRAM_USER + INSTAGRAM_PASS — scripted login
@@ -57,8 +57,10 @@ async function waitRandom(min: number, max: number): Promise<void> {
 }
 
 export async function runFollowersResearch(): Promise<FollowersResearchResult> {
-  const stagehand = createStagehand();
+  const stagehand = createStagehand({ verbose: 2 });
   await stagehand.init();
+
+  console.log("🔧 Stagehand initialized with verbose=2 for maximum debug output");
 
   const page = getActivePage(stagehand);
   const sessionId = stagehand.browserbaseSessionId ?? stagehand.browserbaseSessionID;

@@ -1,4 +1,5 @@
 import type { Stagehand } from "@browserbasehq/stagehand";
+import { getStagehandAgentModelString } from "./stagehand-llm.js";
 
 /**
  * Multi-step “agent” mode (DOM tools: act, observe, etc. inside one LLM loop).
@@ -19,6 +20,6 @@ import type { Stagehand } from "@browserbasehq/stagehand";
 export function createInstagramDomAgent(stagehand: Stagehand) {
   return stagehand.agent({
     mode: "dom",
-    model: "gpt-4o",
+    model: getStagehandAgentModelString(),
   });
 }
