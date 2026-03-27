@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "skills": {
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "computedHash": "063a0e6448123cd359ad0044cc46b0e490cc7964d45ef4bb9fd842bd2ffbca67"
+    },
+    "notion-cli": {
+      "source": "makenotion/skills",
+      "sourceType": "github",
+      "computedHash": "50be712a9311f689e2e72b5c41b1f0736d107bf205e7e79512e3fd6d28e5782b"
+    }
+  }
+}

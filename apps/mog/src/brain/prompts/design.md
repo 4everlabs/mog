@@ -2,23 +2,23 @@
 
 ## Colors
 
-- `#d4d8e0` — page background, the cool lavender-gray behind everything
-- `#fafafa` — surface background (cards, dialogs, inputs, panels, menus)
-- `#030201` — primary text, strong borders, dark button fills
-- `#24211a` — secondary text
-- `#3b342e` — muted text, timestamps, supporting copy
-- `#6b615e` — disabled text, soft borders
-- `#acacac` — neutral chips, muted fills, skeleton placeholders
-- `#97B4ED` — Eve accent fill (Eve buttons, Eve message bubbles, selected chips, messenger sent bubbles)
-- `#5973A8` — Eve deep accent (notification count badges)
-- `#293D64` — darkest accent (gradient endpoints, checkbox accent)
+- `#d4d8e0` - page background, the cool lavender-gray behind everything
+- `#fafafa` - surface background (cards, dialogs, inputs, panels, menus)
+- `#030201` - primary text, strong borders, dark button fills
+- `#24211a` - secondary text
+- `#3b342e` - muted text, timestamps, supporting copy
+- `#6b615e` - disabled text, soft borders
+- `#acacac` - neutral chips, muted fills, skeleton placeholders
+- `#97B4ED` - Eve accent fill (Eve buttons, Eve message bubbles, selected chips, messenger sent bubbles)
+- `#5973A8` - Eve deep accent (notification count badges)
+- `#293D64` - darkest accent (gradient endpoints, checkbox accent)
 
 ## Fonts
 
-- `Momo Trust Sans` — default UI font
-- `Momo Trust Display` — hero and title moments
-- `Funnel Sans` — selected draft and help headings
-- `Red Hat Mono` — overlines, timestamps, badges, small utility text
+- `Momo Trust Sans` - default UI font
+- `Momo Trust Display` - hero and title moments
+- `Funnel Sans` - selected draft and help headings
+- `Red Hat Mono` - overlines, timestamps, badges, small utility text
 
 ## Stroke / Outline Widths
 
