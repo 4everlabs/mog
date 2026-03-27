@@ -1,17 +1,24 @@
 {
   "toolName": "research_list_sources",
-  "executedAt": "2026-03-26T22:39:04.147Z",
+  "executedAt": "2026-03-27T17:53:18.983Z",
   "input": {},
   "output": {
     "sources": [
+      {
+        "id": "Storyworth",
+        "provider": "twitter",
+        "title": "Storyworth",
+        "sourceUrl": "https://twitter.com/Storyworth",
+        "hasCachedData": false,
+        "entryCount": 0
+      },
       {
         "id": "storyworth-google-alert",
         "provider": "rss",
         "title": "Storyworth Google Alert",
         "sourceUrl": "https://www.google.com/alerts/feeds/11780457456973594295/16131467136740592611",
-        "hasCachedData": true,
-        "entryCount": 3,
-        "lastUpdated": "2026-03-26T22:37:54.452Z",
+        "hasCachedData": false,
+        "entryCount": 0,
         "tags": [
           "competitor",
           "google-alert",
@@ -19,6 +26,6 @@
         ]
       }
     ],
-    "totalSources": 1
+    "totalSources": 2
   }
 }

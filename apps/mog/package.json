@@ -13,17 +13,27 @@
     "dev": "bun run index.ts",
     "build": "bun build ./src/index.ts --outdir dist",
     "check": "oxlint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "ig:research": "bun run src/integrations/browser-base/ig/run-followers-research.ts",
+    "ig:public-test": "bun run src/integrations/browser-base/ig/run-followers-public-test.ts",
+    "browserbase:verify": "bun run src/integrations/browser-base/verify-browserbase.ts"
   },
   "dependencies": {
-    "@mog/types": "workspace:*"
+    "@browserbasehq/sdk": "^2.9.0",
+    "@browserbasehq/stagehand": "^3.2.0",
+    "@mog/types": "workspace:*",
+    "ai": "^6.0.141",
+    "deepmerge": "^4.3.1",
+    "dotenv": "^17.3.1",
+    "playwright": "^1.58.2",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "latest",
-    "oxlint": "^0.15.0"
+    "oxlint": "^0.15.15"
   },
   "peerDependencies": {
-    "typescript": "^5"
+    "typescript": "^6.0.2"
   }
 }

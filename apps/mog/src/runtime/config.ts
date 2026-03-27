@@ -75,6 +75,12 @@ export interface MogEnvironment {
     userName?: string;
     allowedChatIds: number[];
   };
+  ai: {
+    enabled: boolean;
+    model: string;
+    maxSteps: number;
+    maxHistoryMessages: number;
+  };
   tools: MogToolsConfig;
 }
 
@@ -122,6 +128,13 @@ export const loadEnvironment = async (): Promise<MogEnvironment> => {
 
   const twitterEnabled = toolsConfig.twitter?.enabled ?? settings.twitter?.enabled ?? false;
   const rssEnabled = toolsConfig.rss?.enabled ?? settings.rss?.enabled ?? false;
+  const aiConfigured = Boolean(process.env["VERCEL_OIDC_TOKEN"] || process.env["AI_GATEWAY_API_KEY"]);
+  const aiEnabledOverride = process.env["MOG_AI_ENABLED"];
+  const aiEnabled = aiEnabledOverride
+    ? aiEnabledOverride !== "false"
+    : aiConfigured;
+  const aiMaxSteps = Number.parseInt(process.env["MOG_AI_MAX_STEPS"] ?? "5", 10);
+  const aiMaxHistoryMessages = Number.parseInt(process.env["MOG_AI_MAX_HISTORY_MESSAGES"] ?? "12", 10);
 
   return {
     appName: process.env["MOG_APP_NAME"] ?? "mog",
@@ -156,6 +169,15 @@ export const loadEnvironment = async (): Promise<MogEnvironment> => {
       operatorChatId: process.env["TELEGRAM_OPERATOR_CHAT_ID"],
       userName: process.env["TELEGRAM_BOT_USERNAME"],
       allowedChatIds,
+    },
+    ai: {
+      enabled: aiEnabled,
+      model: process.env["MOG_AI_MODEL"] ?? "anthropic/claude-sonnet-4.6",
+      maxSteps: Number.isInteger(aiMaxSteps) && aiMaxSteps > 0 ? aiMaxSteps : 5,
+      maxHistoryMessages:
+        Number.isInteger(aiMaxHistoryMessages) && aiMaxHistoryMessages > 0
+          ? aiMaxHistoryMessages
+          : 12,
     },
     tools: toolsConfig,
   };

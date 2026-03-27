@@ -37,7 +37,8 @@
 		height: 100%;
 		margin: 0;
 		padding: 0;
-		overflow: hidden;
+		overflow-x: hidden;
+		overflow-y: auto;
 		background: var(--bg);
 		color: var(--text);
 		font-family: var(--font-mono);
@@ -49,7 +50,8 @@
 		min-height: 100vh;
 		min-height: 100dvh;
 		margin: 0;
-		overflow: hidden;
+		overflow-x: hidden;
+		overflow-y: auto;
 		background: transparent;
 		color: inherit;
 		font-family: inherit;

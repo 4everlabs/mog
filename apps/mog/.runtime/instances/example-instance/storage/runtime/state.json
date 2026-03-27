@@ -1,0 +1,38 @@
+{
+  "status": "idle",
+  "threads": [
+    {
+      "id": "10e6bbb5-2be7-490c-af35-a1b879349650",
+      "channel": "cli",
+      "messages": [
+        {
+          "role": "user",
+          "content": "list research sources",
+          "id": "6f19db67-0ddb-497e-a0b8-95abdb9992c0",
+          "timestamp": "2026-03-27T17:53:18.980Z"
+        },
+        {
+          "role": "assistant",
+          "content": "Research sources:\n- Storyworth [twitter] (0 entries)\n- storyworth-google-alert [rss] (0 entries)",
+          "id": "ca793e6a-c53e-4d3d-8382-85ae972f53ac",
+          "timestamp": "2026-03-27T17:53:18.985Z"
+        },
+        {
+          "role": "user",
+          "content": "what should we do next?",
+          "id": "67fc63ca-6d31-45fd-ba6d-3d0ab9334193",
+          "timestamp": "2026-03-27T17:53:18.985Z"
+        },
+        {
+          "role": "assistant",
+          "content": "AI execution is not configured for this runtime. Set `AI_GATEWAY_API_KEY` or `VERCEL_OIDC_TOKEN` to enable model-driven replies. Current execution mode is `propose`, and research tools remain available through the gateway tool surface.",
+          "id": "597da99d-da08-4967-ab68-bf3f142ed1ec",
+          "timestamp": "2026-03-27T17:53:18.985Z"
+        }
+      ],
+      "createdAt": "2026-03-26T22:05:47.272Z",
+      "updatedAt": "2026-03-27T17:53:18.985Z"
+    }
+  ],
+  "findings": []
+}

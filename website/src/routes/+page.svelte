@@ -1,26 +1,5 @@
 <script lang="ts">
-	const installCommand = 'curl -fsSL https://website.sh/install | sh';
 	const altCommand = 'npx mog@latest';
-
-	let copied = $state(false);
-	let resetHandle: ReturnType<typeof setTimeout> | undefined;
-
-	async function copyInstallCommand() {
-		try {
-			await navigator.clipboard.writeText(installCommand);
-			copied = true;
-
-			if (resetHandle) {
-				clearTimeout(resetHandle);
-			}
-
-			resetHandle = setTimeout(() => {
-				copied = false;
-			}, 1600);
-		} catch {
-			copied = false;
-		}
-	}
 </script>
 
 <svelte:head>
@@ -51,7 +30,10 @@
 				<span class="eyebrow__text">./launch_mog</span>
 			</p>
 
-			<p class="accent-line">quietly opinionated software for marketers</p>
+			<p class="accent-line">
+				"Do not think that I have come to bring peace to the earth; I have not come to
+				bring peace, but a sword" -Jesus
+			</p>
 
 			<h1>The marketing agent that ships.</h1>
 
@@ -82,9 +64,21 @@
 						<span class="cursor" aria-hidden="true"></span>
 					</code>
 
-					<button class="copy-button" type="button" onclick={copyInstallCommand}>
-						{copied ? 'copied' : 'copy'}
-					</button>
+					<div class="copy-button-wrap">
+						<button
+							class="copy-button"
+							type="button"
+							aria-describedby="install-status-popup"
+							aria-label="Install command availability"
+						>
+							copy
+						</button>
+
+						<div class="install-popup" id="install-status-popup" role="status" aria-live="polite">
+							<span class="install-popup__title">[ install ]</span>
+							<span class="install-popup__message">coming soon</span>
+						</div>
+					</div>
 				</div>
 			</div>
 
@@ -344,6 +338,11 @@
 			color 160ms ease;
 	}
 
+	.copy-button-wrap {
+		position: relative;
+		flex: 0 0 auto;
+	}
+
 	.copy-button:hover,
 	.copy-button:focus-visible {
 		border-color: rgba(224, 175, 104, 0.4);
@@ -351,6 +350,58 @@
 		color: var(--yellow);
 		transform: translateY(-1px);
 		outline: none;
+	}
+
+	.install-popup {
+		position: absolute;
+		right: 0;
+		bottom: calc(100% + 0.65rem);
+		display: grid;
+		gap: 0.3rem;
+		min-width: 7.5rem;
+		padding: 0.55rem 0.7rem;
+		border: 1px solid rgba(104, 181, 252, 0.2);
+		background: rgba(0, 0, 0, 0.96);
+		box-shadow: 0 0 0 1px rgba(224, 175, 104, 0.08);
+		opacity: 0;
+		pointer-events: none;
+		transform: translateY(0.25rem);
+		transition:
+			opacity 140ms ease,
+			transform 140ms ease;
+	}
+
+	.install-popup::after {
+		content: '';
+		position: absolute;
+		right: 1rem;
+		top: 100%;
+		width: 0.6rem;
+		height: 0.6rem;
+		border-right: 1px solid rgba(104, 181, 252, 0.2);
+		border-bottom: 1px solid rgba(104, 181, 252, 0.2);
+		background: rgba(0, 0, 0, 0.96);
+		transform: translateY(-0.32rem) rotate(45deg);
+	}
+
+	.copy-button-wrap:hover .install-popup,
+	.copy-button-wrap:focus-within .install-popup {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	.install-popup__title {
+		font-size: 0.62rem;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--blue);
+	}
+
+	.install-popup__message {
+		font-size: 0.7rem;
+		letter-spacing: 0.04em;
+		text-transform: lowercase;
+		color: var(--muted);
 	}
 
 	.meta-row {
@@ -471,6 +522,12 @@
 	}
 
 	@media (max-width: 40rem) {
+		.hero {
+			place-items: start center;
+			padding-block: 1rem max(2.75rem, env(safe-area-inset-bottom));
+			overflow: visible;
+		}
+
 		.terminal-shell__bar {
 			padding-inline: 0.85rem;
 		}
@@ -483,6 +540,21 @@
 		.copy-button,
 		.download-link {
 			width: 100%;
+		}
+
+		.copy-button-wrap {
+			width: 100%;
+		}
+
+		.install-popup {
+			left: 0;
+			right: auto;
+			bottom: calc(100% + 0.55rem);
+		}
+
+		.install-popup::after {
+			left: 1rem;
+			right: auto;
 		}
 
 		.command-card__header,

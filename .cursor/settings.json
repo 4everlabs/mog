@@ -1,0 +1,10 @@
+{
+  "plugins": {
+    "functions": {
+      "enabled": true
+    },
+    "browse": {
+      "enabled": true
+    }
+  }
+}

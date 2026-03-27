@@ -14,6 +14,7 @@ import type { ResearchToolServices } from "../tools/research/types.ts";
 import type { MogEnvironment } from "../runtime/config.ts";
 import type { RuntimeRepository } from "../runtime/state/repository.ts";
 import type { GatewaySurface } from "./contracts.ts";
+import { generateGatewayReply } from "./execution.ts";
 import { emitToolExecutionEvent, subscribeToRuntime } from "./events.ts";
 import { buildGatewayBootstrap, projectFindingSummary, projectRuntimeView, projectThreadSummary } from "./projections.ts";
 import { resolveMessageThread } from "./sessions.ts";
@@ -83,7 +84,7 @@ export class GatewayService implements GatewaySurface {
     return this.runExclusive(async () => {
       const thread = resolveMessageThread(this.repository, params);
       this.repository.appendMessage(thread.id, { role: "user", content: params.message });
-      const response = await this.generateResponse(params.message);
+      const response = await this.generateResponse(thread.id);
       this.repository.appendMessage(thread.id, { role: "assistant", content: response });
 
       return {
@@ -100,21 +101,19 @@ export class GatewayService implements GatewaySurface {
     });
   }
 
-  private async generateResponse(content: string): Promise<string> {
-    const lower = content.toLowerCase();
-
-    if (lower.includes("list") && (lower.includes("source") || lower.includes("research") || lower.includes("rss") || lower.includes("twitter"))) {
-      const result = await this.toolExecutor.execute("research_list_sources", {});
-      if (result.success && result.output) {
-        const output = result.output as { sources?: Array<{ id: string; provider: string; entryCount: number }> };
-        if (output.sources?.length) {
-          return `Research sources:\n${output.sources.map((source) => `- ${source.id} [${source.provider}] (${source.entryCount} entries)`).join("\n")}`;
-        }
-      }
-      return "No research sources registered yet.";
+  private async generateResponse(threadId: string): Promise<string> {
+    const thread = this.repository.getThread(threadId);
+    if (!thread) {
+      return "I could not resolve the current conversation thread.";
     }
 
-    return `Got: "${content}". I can help with research sources. Try "list research sources".`;
+    try {
+      return await generateGatewayReply(this.env, thread, this.toolExecutor);
+    } catch (error) {
+      return error instanceof Error
+        ? `I hit an error while generating a reply: ${error.message}`
+        : "I hit an unknown error while generating a reply.";
+    }
   }
 
   async executeTool(toolName: string, input: Record<string, unknown>): Promise<ToolExecutionResult> {

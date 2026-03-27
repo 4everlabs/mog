@@ -9,8 +9,13 @@ export const getInstanceId = (): string => process.env["MOG_INSTANCE_ID"] ?? "ex
 
 export const resolveRepoPath = (...segments: string[]): string => resolve(repoRoot, ...segments);
 
+export const resolveAppPath = (...segments: string[]): string => resolve(appRoot, ...segments);
+
 export const resolveRuntimePath = (...segments: string[]): string =>
   resolve(appRoot, ".runtime", ...segments);
+
+export const resolveBrainPath = (...segments: string[]): string =>
+  resolve(appRoot, "src", "brain", ...segments);
 
 export const resolveInstanceRootPath = (instanceId: string = getInstanceId()): string =>
   resolveRuntimePath("instances", instanceId);
