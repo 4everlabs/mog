@@ -1,9 +1,9 @@
 import { researchTools } from "./definitions.ts";
+import type { ToolSummary } from "@mog/types";
 import type {
   AnyRegisteredTool,
   IntegrationCapabilitySnapshot,
   ToolExecutionServices,
-  ToolSummary,
 } from "./types.ts";
 
 const registeredTools: readonly AnyRegisteredTool[] = [

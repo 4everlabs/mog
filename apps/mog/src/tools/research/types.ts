@@ -53,11 +53,3 @@ export interface ToolExecutionServices {
   readonly shell?: { execute: (cmd: string) => { output: string } } | null;
 }
 
-export interface ToolSummary {
-  name: string;
-  title: string;
-  description: string;
-  integration: string;
-  approvalRequired: boolean;
-  implemented: boolean;
-}

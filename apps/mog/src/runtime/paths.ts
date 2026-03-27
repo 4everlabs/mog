@@ -12,13 +12,34 @@ export const resolveRepoPath = (...segments: string[]): string => resolve(repoRo
 export const resolveRuntimePath = (...segments: string[]): string =>
   resolve(appRoot, ".runtime", ...segments);
 
+export const resolveInstanceRootPath = (instanceId: string = getInstanceId()): string =>
+  resolveRuntimePath("instances", instanceId);
+
 export const resolveInstanceWorkspacePath = (instanceId: string = getInstanceId()): string =>
   resolveRuntimePath("instances", instanceId, "workspace");
 
-export const resolveInstanceStoragePath = (instanceId: string = getInstanceId()): string =>
+export const resolveLegacyInstanceStoragePath = (instanceId: string = getInstanceId()): string =>
   resolveRuntimePath("instances", instanceId, "workspace", "storage");
+
+export const resolveInstanceStorageRootPath = (instanceId: string = getInstanceId()): string =>
+  resolveRuntimePath("instances", instanceId, "storage");
+
+export const resolveInstanceStoragePath = (instanceId: string = getInstanceId()): string =>
+  resolveRuntimePath("instances", instanceId, "storage", "runtime");
+
+export const resolveRuntimeStatePath = (instanceId: string = getInstanceId()): string =>
+  resolve(resolveInstanceStoragePath(instanceId), "state.json");
+
+export const resolveRuntimeEventLogPath = (instanceId: string = getInstanceId()): string =>
+  resolve(resolveInstanceStoragePath(instanceId), "events.jsonl");
+
+export const resolveRuntimeSnapshotPath = (instanceId: string = getInstanceId()): string =>
+  resolveRuntimeStatePath(instanceId);
+
+export const resolveRuntimeMigrationPath = (instanceId: string = getInstanceId()): string =>
+  resolve(resolveInstanceStoragePath(instanceId), "migrations.json");
 
 export const resolveResearchProviderStoragePath = (
   provider: ResearchSourceProvider,
   instanceId: string = getInstanceId(),
-): string => resolveRuntimePath("instances", instanceId, "workspace", "storage", provider);
+): string => resolveRuntimePath("instances", instanceId, "storage", "providers", provider);

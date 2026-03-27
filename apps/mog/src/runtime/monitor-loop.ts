@@ -1,5 +1,5 @@
 import type { ResearchToolServices } from "../tools/research/types.ts";
-import type { RuntimeStore } from "./store.ts";
+import type { RuntimeRepository } from "./state/repository.ts";
 
 export interface SourceRefreshPlan {
   sourceId: string;
@@ -7,7 +7,7 @@ export interface SourceRefreshPlan {
 }
 
 export interface MonitorLoopConfig {
-  store: RuntimeStore;
+  repository: RuntimeRepository;
   researchService: ResearchToolServices | null;
   refreshPlans: SourceRefreshPlan[];
 }
@@ -30,7 +30,7 @@ export class MonitorLoop {
     }
 
     this.isRunning = true;
-    this.config.store.addEvent({
+    this.config.repository.addEvent({
       kind: "monitor",
       level: "info",
       source: "runtime.monitor",
@@ -50,7 +50,7 @@ export class MonitorLoop {
       clearInterval(this.timer);
       this.timer = null;
     }
-    this.config.store.addEvent({
+    this.config.repository.addEvent({
       kind: "monitor",
       level: "info",
       source: "runtime.monitor",
@@ -62,7 +62,7 @@ export class MonitorLoop {
   }
 
   async tick(): Promise<void> {
-    this.config.store.setStatus("monitoring", {
+    this.config.repository.setStatus("monitoring", {
       source: "runtime.monitor",
       message: "monitor tick started",
       details: {
@@ -89,15 +89,15 @@ export class MonitorLoop {
         });
         this.lastRefreshBySource.set(plan.sourceId, now);
 
-        this.config.store.addEvent({
+        this.config.repository.addEvent({
           kind: "monitor",
           level: result?.success ? "info" : "warning",
           source: "runtime.monitor",
           message: result?.success
             ? `refreshed source ${plan.sourceId}`
             : `refresh failed for ${plan.sourceId}`,
+          sourceId: plan.sourceId,
           details: {
-            sourceId: plan.sourceId,
             intervalMs: plan.intervalMs,
             success: result?.success ?? false,
             newEntriesFound: result?.newEntriesFound ?? 0,
@@ -107,7 +107,7 @@ export class MonitorLoop {
         });
       }
     } catch (error) {
-      this.config.store.addEvent({
+      this.config.repository.addEvent({
         kind: "monitor",
         level: "error",
         source: "runtime.monitor",
@@ -117,7 +117,7 @@ export class MonitorLoop {
         },
       });
     } finally {
-      this.config.store.setStatus("idle", {
+      this.config.repository.setStatus("idle", {
         source: "runtime.monitor",
         message: "monitor tick complete",
       });

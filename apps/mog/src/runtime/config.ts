@@ -1,5 +1,6 @@
 import type { RssResearchSourceConfig, TwitterResearchSourceConfig } from "../research/types.ts";
 import type { ResearchToolsConfig } from "../tools/research/schema.ts";
+import type { RuntimeChannel } from "@mog/types";
 import {
   getInstanceId,
   resolveInstanceStoragePath,
@@ -44,7 +45,7 @@ export interface MogEnvironment {
   instanceId: string;
   workspacePath: string;
   executionMode: "observe" | "propose" | "execute";
-  channels: string[];
+  channels: RuntimeChannel[];
   storagePath: string;
   researchEnabled: boolean;
   twitter: {
@@ -72,6 +73,7 @@ export interface MogEnvironment {
     botToken?: string;
     operatorChatId?: string;
     userName?: string;
+    allowedChatIds: number[];
   };
   tools: MogToolsConfig;
 }
@@ -95,6 +97,12 @@ export const loadEnvironment = async (): Promise<MogEnvironment> => {
   const settings = await loadSettings(instanceId);
   const toolsConfig = await loadToolsConfig(instanceId);
   const workspacePath = process.env["MOG_WORKSPACE_PATH"] ?? resolveInstanceWorkspacePath(instanceId);
+  const allowedChatIds = (process.env["TELEGRAM_ALLOWED_CHAT_IDS"] ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .map((value) => Number.parseInt(value, 10))
+    .filter((value) => Number.isInteger(value));
   const twitterAccounts = settings.twitter?.accounts ?? [];
   const rssFeeds = settings.rss?.feeds ?? [];
 
@@ -121,7 +129,10 @@ export const loadEnvironment = async (): Promise<MogEnvironment> => {
     instanceId,
     workspacePath,
     executionMode: (process.env["MOG_EXECUTION_MODE"] as MogEnvironment["executionMode"]) ?? "propose",
-    channels: (process.env["MOG_CHANNELS"] ?? "cli").split(",").map((channel) => channel.trim()),
+    channels: (process.env["MOG_CHANNELS"] ?? "cli")
+      .split(",")
+      .map((channel) => channel.trim())
+      .filter(Boolean) as RuntimeChannel[],
     storagePath: process.env["MOG_STORAGE_PATH"] ?? resolveInstanceStoragePath(instanceId),
     researchEnabled: twitterEnabled || rssEnabled,
     twitter: {
@@ -144,6 +155,7 @@ export const loadEnvironment = async (): Promise<MogEnvironment> => {
       botToken: process.env["TELEGRAM_BOT_TOKEN"],
       operatorChatId: process.env["TELEGRAM_OPERATOR_CHAT_ID"],
       userName: process.env["TELEGRAM_BOT_USERNAME"],
+      allowedChatIds,
     },
     tools: toolsConfig,
   };

@@ -1,8 +1,14 @@
 {
   "name": "@mog/types",
   "version": "0.0.0",
+  "main": "./index.ts",
   "type": "module",
   "private": true,
-  "main": "./index.ts",
-  "module": "./index.ts"
+  "module": "./index.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "exports": {
+    ".": "./index.ts"
+  }
 }

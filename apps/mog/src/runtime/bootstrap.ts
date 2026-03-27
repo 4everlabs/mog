@@ -1,25 +1,30 @@
 import { RssResearchProvider } from "../integrations/rss/provider.ts";
 import { TwitterResearchProvider } from "../integrations/twitter/provider.ts";
+import { GatewayService } from "../gateway/service.ts";
 import { ResearchService } from "../research/service.ts";
 import { loadEnvironment } from "./config.ts";
-import { Gateway } from "./gateway.ts";
+import { RuntimeKernel } from "./kernel.ts";
 import { MonitorLoop, type SourceRefreshPlan } from "./monitor-loop.ts";
-import { RuntimeStore } from "./store.ts";
+import { RuntimeRepository } from "./state/repository.ts";
+import type { RuntimeChannel } from "@mog/types";
 
 export interface MogRuntime {
   env: Awaited<ReturnType<typeof loadEnvironment>>;
-  store: RuntimeStore;
-  gateway: Gateway;
+  repository: RuntimeRepository;
+  gateway: GatewayService;
   monitorLoop: MonitorLoop;
+  kernel: RuntimeKernel;
   researchService: ResearchService;
 }
 
 export async function bootstrap(): Promise<MogRuntime> {
   const env = await loadEnvironment();
 
-  const store = new RuntimeStore(env.storagePath);
-  store.load();
-  store.setStatus("booting", {
+  const repository = new RuntimeRepository({
+    instanceId: env.instanceId,
+  });
+  repository.load();
+  repository.setStatus("booting", {
     source: "runtime.bootstrap",
     message: `bootstrapping ${env.appName}`,
     details: {
@@ -43,7 +48,7 @@ export async function bootstrap(): Promise<MogRuntime> {
     twitterProvider,
   });
 
-  const gateway = new Gateway(env, store, researchService);
+  const gateway = new GatewayService(env, repository, researchService);
 
   const refreshPlans: SourceRefreshPlan[] = [
     ...env.twitter.sources.map((source) => ({
@@ -57,26 +62,27 @@ export async function bootstrap(): Promise<MogRuntime> {
   ];
 
   const monitorLoop = new MonitorLoop({
-    store,
+    repository,
     researchService,
     refreshPlans,
   });
+  const kernel = new RuntimeKernel(env, monitorLoop);
 
   for (const channel of env.channels) {
     if (channel !== "system") {
-      store.ensureDefaultThread(channel as "cli" | "telegram" | "web");
+      repository.ensureDefaultThread(channel as Exclude<RuntimeChannel, "system">);
     }
   }
 
-  store.setStatus("idle", {
+  repository.setStatus("idle", {
     source: "runtime.bootstrap",
     message: `${env.appName} runtime ready`,
     details: {
       channels: env.channels,
       researchEnabled: env.researchEnabled,
-      threadCount: store.listThreads().length,
+      threadCount: repository.listThreads().length,
     },
   });
 
-  return { env, store, gateway, monitorLoop, researchService };
+  return { env, repository, gateway, monitorLoop, kernel, researchService };
 }

@@ -37,14 +37,12 @@ turbo.json
 # Local env files
 .env
 .env.*
-!.env.example
+
 
 # oxlint
 oxlintrc.json
 
-# Public assets
-public/*.png
-!public/logo.png
+
 
 # IntelliJ based IDEs
 .idea
@@ -56,5 +54,3 @@ public/*.png
 .runtime/instances/personal-instance/
 .runtime/instances/*/storage/
 .runtime/instances/*/workspace/storage/twitter/*.jsonl
-
-_notes/

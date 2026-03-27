@@ -1,7 +1,8 @@
 import { Chat, markdownToPlainText, type Message, type Thread } from "chat";
 import { createTelegramAdapter } from "@chat-adapter/telegram";
 import { createMemoryState } from "@chat-adapter/state-memory";
-import type { RuntimeBootstrap } from "@mog/types";
+import type { GatewayClient } from "@mog/types";
+import type { MogEnvironment } from "@mog/core";
 import {
   convertMarkdownToTelegramMarkdownV2,
   telegramMarkdownV2ParseMode,
@@ -122,38 +123,29 @@ const sendTelegramReply = async (
   }
 };
 
+interface TelegramSurfaceContext {
+  env: Pick<MogEnvironment, "telegram">;
+  client: GatewayClient;
+}
+
 const forwardMessageToRuntime = async (
-  runtime: RuntimeBootstrap,
-  runtimeThreadIds: Map<string, string>,
+  context: TelegramSurfaceContext,
   thread: Thread,
   message: Message,
 ): Promise<string> => {
-  const title = getThreadTitle(thread.id);
-  const existingThreadId = runtimeThreadIds.get(thread.id)
-    ?? runtime.store.listThreads().find((entry) => entry.channel === "telegram" && entry.title === title)?.id;
+  const response = await context.client.sendMessage({
+    channel: "telegram",
+    externalId: thread.id,
+    title: getThreadTitle(thread.id),
+    message: message.text,
+  });
 
-  const response = await runtime.gateway.sendMessage(
-    existingThreadId
-      ? {
-          channel: "telegram",
-          threadId: existingThreadId,
-          message: message.text,
-        }
-      : {
-          channel: "telegram",
-          title,
-          message: message.text,
-        },
-  );
-
-  runtimeThreadIds.set(thread.id, response.thread.id);
   return response.replyMessage.content;
 };
 
 const postRuntimeReply = async (
-  runtime: RuntimeBootstrap,
+  context: TelegramSurfaceContext,
   botToken: string,
-  runtimeThreadIds: Map<string, string>,
   allowedChatIds: readonly number[],
   thread: Thread,
   message: Message,
@@ -163,7 +155,7 @@ const postRuntimeReply = async (
   }
 
   writeStdoutLine(`[telegram] received message on ${thread.id}: ${message.text}`);
-  const reply = await forwardMessageToRuntime(runtime, runtimeThreadIds, thread, message);
+  const reply = await forwardMessageToRuntime(context, thread, message);
   const plainTextReply = normalizeTelegramReplyText(reply);
   await sendTelegramReply(botToken, thread.id, plainTextReply);
   writeStdoutLine(`[telegram] posted reply on ${thread.id}: ${plainTextReply.slice(0, 240)}`);
@@ -188,46 +180,45 @@ const queueThreadReply = (
   });
 };
 
-export const startTelegramSurface = async (runtime: RuntimeBootstrap): Promise<void> => {
-  const botToken = runtime.env.telegram?.botToken;
+export const startTelegramSurface = async (context: TelegramSurfaceContext): Promise<void> => {
+  const botToken = context.env.telegram?.botToken;
   if (!botToken) {
     throw new Error("TELEGRAM_BOT_TOKEN is required when Telegram is enabled.");
   }
 
   const telegram = createTelegramAdapter({
     mode: "polling",
-    userName: runtime.env.telegram?.userName ?? undefined,
+    userName: context.env.telegram?.userName ?? undefined,
   });
 
   const bot = new Chat({
-    userName: runtime.env.telegram?.userName ?? "mog",
+    userName: context.env.telegram?.userName ?? "mog",
     adapters: {
       telegram,
     },
     state: createMemoryState(),
   });
 
-  const runtimeThreadIds = new Map<string, string>();
   const threadQueues = new Map<string, Promise<void>>();
-  const allowedChatIds = [...(runtime.env.telegram?.allowedChatIds ?? [])];
+  const allowedChatIds = [...(context.env.telegram?.allowedChatIds ?? [])];
 
   bot.onNewMention(async (thread, message) => {
     await queueThreadReply(threadQueues, thread.id, async () => {
       await thread.subscribe();
-      await postRuntimeReply(runtime, botToken, runtimeThreadIds, allowedChatIds, thread, message);
+      await postRuntimeReply(context, botToken, allowedChatIds, thread, message);
     });
   });
 
   bot.onNewMessage(/[\s\S]+/u, async (thread, message) => {
     await queueThreadReply(threadQueues, thread.id, async () => {
       await thread.subscribe();
-      await postRuntimeReply(runtime, botToken, runtimeThreadIds, allowedChatIds, thread, message);
+      await postRuntimeReply(context, botToken, allowedChatIds, thread, message);
     });
   });
 
   bot.onSubscribedMessage(async (thread, message) => {
     await queueThreadReply(threadQueues, thread.id, async () => {
-      await postRuntimeReply(runtime, botToken, runtimeThreadIds, allowedChatIds, thread, message);
+      await postRuntimeReply(context, botToken, allowedChatIds, thread, message);
     });
   });
 

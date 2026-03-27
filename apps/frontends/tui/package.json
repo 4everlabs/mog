@@ -11,10 +11,13 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@mog/core": "workspace:*",
+    "@mog/types": "workspace:*",
     "@opentui/core": "latest"
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/node": "latest",
     "oxlint": "latest",
     "typescript": "latest"
   }

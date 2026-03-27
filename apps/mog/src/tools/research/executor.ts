@@ -1,11 +1,12 @@
 import { mkdir } from "node:fs/promises";
+import type { ToolExecutionResult } from "@mog/types";
 import { buildToolSummaries, getRegisteredTool } from "./registry.ts";
 import type {
   IntegrationCapabilitySnapshot,
   ResearchToolServices,
   ToolExecutionServices,
-  ToolSummary,
 } from "./types.ts";
+import type { ToolSummary } from "@mog/types";
 
 export interface ToolExecutorConfig {
   researchService: ResearchToolServices | null;
@@ -16,13 +17,6 @@ export interface ToolExecutorConfig {
     input: unknown;
     result: ToolExecutionResult;
   }) => void | Promise<void>;
-}
-
-export interface ToolExecutionResult {
-  success: boolean;
-  output?: unknown;
-  error?: string;
-  workspaceFile?: string;
 }
 
 export class ToolExecutor {
