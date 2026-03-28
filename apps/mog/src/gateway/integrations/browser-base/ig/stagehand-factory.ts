@@ -5,7 +5,7 @@ import { getStagehandV3Options as getLLMConfig } from "./stagehand-llm.js";
 
 export function getStagehandV3Options(overrides?: Partial<V3Options>): V3Options {
   const config = getLLMConfig();
-  console.log("🔧 Using model:", config.model?.modelName ?? "(unset)");
+  console.error("🔧 Using model:", config.model?.modelName ?? "(unset)");
 
   const base: V3Options = {
     env: "BROWSERBASE",

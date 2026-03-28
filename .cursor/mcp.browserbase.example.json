@@ -1,0 +1,8 @@
+{
+  "_comment": "Copy the object printed by: cd apps/mog && bun run mcp:browserbase-cursor",
+  "mcpServers": {
+    "browserbase": {
+      "url": "https://mcp.browserbase.com/mcp?browserbaseApiKey=YOUR_KEY&modelName=openai%2Fstepfun%2Fstep-3.5-flash%3Afree&modelApiKey=YOUR_OPENROUTER_KEY"
+    }
+  }
+}
