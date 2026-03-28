@@ -1,0 +1,10 @@
+{
+  "env": "LOCAL",
+  "siteURL": "https://news.ycombinator.com/",
+  "model": "google/gemini-3-flash-preview",
+  "apiBaseURL": "https://openrouter.ai/api/v1",
+  "storyLimit": 3,
+  "maxAgentSteps": 8,
+  "verbose": 1,
+  "outputPath": "test-output/hacker-news-top-stories.json"
+}

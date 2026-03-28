@@ -1,0 +1,7 @@
+{
+  "model": "google/gemini-3-flash-preview",
+  "env": "LOCAL",
+  "username": "your_username",
+  "max_scroll_attempts": 10,
+  "max_scroll_delay": 1000
+}
