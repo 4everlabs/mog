@@ -16,17 +16,17 @@ for (const name of [".env", ".env.local"] as const) {
 }
 
 type InstagramScrapeConfig = {
-  env?: "LOCAL";
+  env: "LOCAL";
   model: string;
-  apiBaseURL?: string;
-  siteURL?: string;
+  apiBaseURL: string;
+  siteURL: string;
   username: string;
-  max_scroll_attempts?: number;
-  max_scroll_delay?: number;
-  storyLimit?: number;
-  maxAgentSteps?: number;
-  verbose?: 0 | 1 | 2;
-  outputPath?: string;
+  max_scroll_attempts: number;
+  max_scroll_delay: number;
+  storyLimit: number;
+  maxAgentSteps: number;
+  verbose: 0 | 1 | 2;
+  outputPath: string;
   systemPrompt?: string;
 };
 
@@ -81,23 +81,9 @@ type InstagramScrapeOutput = {
 type InstagramPage = NonNullable<ReturnType<Stagehand["context"]["pages"]>[0]>;
 
 function readInstagramScrapeConfig(): InstagramScrapeConfig {
-  const raw = JSON.parse(
+  return JSON.parse(
     readFileSync(resolve(here, "scrape.config.json"), "utf8"),
   ) as InstagramScrapeConfig;
-
-  return {
-    env: "LOCAL",
-    apiBaseURL: "https://openrouter.ai/api/v1",
-    siteURL: "https://instagram.com/",
-    username: raw.username,
-    max_scroll_attempts: raw.max_scroll_attempts ?? 10,
-    max_scroll_delay: raw.max_scroll_delay ?? 1000,
-    storyLimit: 3,
-    maxAgentSteps: 8,
-    verbose: 1,
-    outputPath: `test-output/instagram-scrape-${raw.username || "default"}.json`,
-    ...raw,
-  };
 }
 
 function requireOpenRouterApiKey(): string {
@@ -159,9 +145,9 @@ function createInstagramStagehand(
   cfg: InstagramScrapeConfig,
 ): Stagehand {
   return new Stagehand({
-    env: cfg.env ?? "LOCAL",
+    env: cfg.env,
     experimental: true,
-    verbose: cfg.verbose ?? 1,
+    verbose: cfg.verbose,
     selfHeal: true,
     serverCache: false,
     model: getAgentModelConfig(cfg),
@@ -180,10 +166,7 @@ function createInstagramAgent(
 }
 
 function resolveInstagramOutputPath(cfg: InstagramScrapeConfig): string {
-  return resolve(
-    monorepoRoot,
-    cfg.outputPath ?? "test-output/instagram-scrape.json",
-  );
+  return resolve(monorepoRoot, cfg.outputPath);
 }
 
 function sanitizeAgentMessage(message: string): string {
@@ -314,7 +297,7 @@ async function openStoryCommentsPage(
   const agent = createInstagramAgent(stagehand, cfg);
   const result = await agent.execute({
     instruction: buildOpenCommentsInstruction(story.title),
-    maxSteps: cfg.maxAgentSteps ?? 8,
+    maxSteps: cfg.maxAgentSteps,
     page,
   });
 
@@ -410,7 +393,7 @@ async function scrapeStoryComments(
     throw new Error("No active page available after stagehand.init().");
   }
 
-  await page.goto(cfg.siteURL ?? "https://instagram.com/", {
+  await page.goto(cfg.siteURL, {
     waitUntil: "domcontentloaded",
     timeoutMs: 60_000,
   });
@@ -469,12 +452,12 @@ export async function runInstagramScrape(): Promise<InstagramScrapeOutput> {
       throw new Error("No active page available after stagehand.init().");
     }
 
-    await page.goto(cfg.siteURL ?? "https://instagram.com/", {
+    await page.goto(cfg.siteURL, {
       waitUntil: "domcontentloaded",
       timeoutMs: 60_000,
     });
 
-    const topStories = await readFrontPageStories(page, cfg.storyLimit ?? 3);
+    const topStories = await readFrontPageStories(page, cfg.storyLimit);
     const stories: InstagramStoryResult[] = [];
     let useAgent = true;
 
@@ -493,8 +476,8 @@ export async function runInstagramScrape(): Promise<InstagramScrapeOutput> {
 
     const output: InstagramScrapeOutput = {
       scrapedAt: new Date().toISOString(),
-      siteURL: cfg.siteURL ?? "https://instagram.com/",
-      storyLimit: cfg.storyLimit ?? 3,
+      siteURL: cfg.siteURL,
+      storyLimit: cfg.storyLimit,
       model: cfg.model,
       stories,
     };

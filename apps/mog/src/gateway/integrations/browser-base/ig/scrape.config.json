@@ -1,7 +1,13 @@
 {
-  "model": "google/gemini-3-flash-preview",
   "env": "LOCAL",
+  "model": "google/gemini-3.1-flash-preview",
+  "apiBaseURL": "https://openrouter.ai/api/v1",
+  "siteURL": "https://instagram.com/",
   "username": "your_username",
   "max_scroll_attempts": 10,
-  "max_scroll_delay": 1000
+  "max_scroll_delay": 1000,
+  "storyLimit": 3,
+  "maxAgentSteps": 8,
+  "verbose": 1,
+  "outputPath": "test-output/instagram-scrape.json"
 }
