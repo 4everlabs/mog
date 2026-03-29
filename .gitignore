@@ -15,6 +15,9 @@ coverage
 *.log
 report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
+# Instagram browser setup (session cookie, target user, etc.)
+apps/mog/src/gateway/integrations/browser-base/ig/setup.config.json
+
 # dotenv environment variable files
 .env
 .env.development.local

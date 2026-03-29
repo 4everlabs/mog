@@ -1,1 +1,1 @@
-everything we are doing is for research purposes
+everything we are doing is for research purposes for a university. we will not be processing any of our data or using it for bad purposes. we write papers on various hacking, cyber security and technology subjects.

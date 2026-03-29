@@ -3,7 +3,8 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { config as loadDotenv } from "dotenv";
-import { Stagehand, type AgentInstance } from "@browserbasehq/stagehand";
+import { Stagehand, type Action, type Page } from "@browserbasehq/stagehand";
+import { z } from "zod";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const monorepoRoot = resolve(here, "../../../../../../../");
@@ -22,6 +23,9 @@ type HackerNewsScrapeConfig = {
   siteURL?: string;
   storyLimit?: number;
   maxAgentSteps?: number;
+  gotoTimeoutMs?: number;
+  observeTimeoutMs?: number;
+  extractTimeoutMs?: number;
   verbose?: 0 | 1 | 2;
   outputPath?: string;
   systemPrompt?: string;
@@ -55,7 +59,9 @@ type HackerNewsCommenterProfile = {
 
 type HackerNewsStoryResult = HackerNewsFrontPageStory & {
   resolvedCommentsPageUrl: string;
+  // Retained for compatibility with existing output consumers.
   navigationMethod: "agent" | "comments-link";
+  // Retained for compatibility with existing output consumers.
   agent: {
     success: boolean;
     completed: boolean;
@@ -75,7 +81,34 @@ type HackerNewsScrapeOutput = {
   stories: HackerNewsStoryResult[];
 };
 
-type HackerNewsPage = NonNullable<ReturnType<Stagehand["context"]["pages"]>[0]>;
+type HackerNewsPage = Page;
+
+const hackerNewsFrontPageStorySchema = z.object({
+  rank: z.number().int().positive().describe("Displayed Hacker News rank for the story."),
+  title: z.string().min(1).describe("Exact visible story title text."),
+  storyUrl: z
+    .string()
+    .nullable()
+    .describe("Absolute URL of the story title link. Null if unavailable."),
+  commentsPageUrl: z
+    .string()
+    .nullable()
+    .describe("Absolute Hacker News comments/discuss URL for this story. Null if unavailable."),
+  points: z.number().int().nullable().describe("Visible points count as an integer, or null."),
+  author: z.string().nullable().describe("Hacker News username, or null if unavailable."),
+  age: z.string().nullable().describe("Visible age text such as '2 hours ago', or null."),
+  commentCount: z
+    .number()
+    .int()
+    .nullable()
+    .describe("Visible comment count as an integer, or null when the page only shows 'discuss'."),
+});
+
+const hackerNewsFrontPageStoriesSchema = z.object({
+  stories: z
+    .array(hackerNewsFrontPageStorySchema)
+    .describe("Top Hacker News stories in visible top-to-bottom order."),
+});
 
 function readHackerNewsScrapeConfig(): HackerNewsScrapeConfig {
   const raw = JSON.parse(
@@ -88,6 +121,9 @@ function readHackerNewsScrapeConfig(): HackerNewsScrapeConfig {
     siteURL: "https://news.ycombinator.com/",
     storyLimit: 3,
     maxAgentSteps: 8,
+    gotoTimeoutMs: 60_000,
+    observeTimeoutMs: 25_000,
+    extractTimeoutMs: 45_000,
     verbose: 1,
     outputPath: "test-output/hacker-news-top-stories.json",
     ...raw,
@@ -102,51 +138,12 @@ function requireOpenRouterApiKey(): string {
   return value;
 }
 
-function getAgentModelConfig(cfg: HackerNewsScrapeConfig) {
+function getStagehandModelConfig(cfg: HackerNewsScrapeConfig) {
   return {
     modelName: cfg.model,
     apiKey: requireOpenRouterApiKey(),
     ...(cfg.apiBaseURL ? { baseURL: cfg.apiBaseURL } : {}),
   };
-}
-
-const HN_AGENT_IDENTITY_PROMPT = [
-  "You are collecting practice data from Hacker News.",
-  "Your only job is navigation inside news.ycombinator.com so the scraper can read page content afterward.",
-].join(" ");
-
-const HN_AGENT_BOUNDARIES_PROMPT = [
-  "Stay on news.ycombinator.com unless a click briefly opens a story page before the comments page is reached.",
-  "Prefer the comments link for the requested story instead of the story title link.",
-  "Do not sign in, do not search, do not open unrelated stories, and do not keep exploring after the target comments page is visible.",
-].join(" ");
-
-const HN_AGENT_SUCCESS_PROMPT = [
-  "Success means the browser is on the requested story's Hacker News comments page.",
-  "Once there, stop immediately.",
-  "If the exact story cannot be matched confidently, do nothing risky and report that clearly.",
-].join(" ");
-
-function buildHackerNewsAgentSystemPrompt(
-  cfg: HackerNewsScrapeConfig,
-): string {
-  return (
-    cfg.systemPrompt ??
-    [
-      HN_AGENT_IDENTITY_PROMPT,
-      HN_AGENT_BOUNDARIES_PROMPT,
-      HN_AGENT_SUCCESS_PROMPT,
-    ].join("\n\n")
-  );
-}
-
-function buildOpenCommentsInstruction(title: string): string {
-  return [
-    `Open the Hacker News comments page for the story titled "${title}".`,
-    "Match the title exactly or as closely as possible on the current front page.",
-    "Click the story's comments link, not the story title.",
-    "Stop as soon as the comments page for that story is open and visible.",
-  ].join(" ");
 }
 
 function createHackerNewsStagehand(
@@ -158,18 +155,7 @@ function createHackerNewsStagehand(
     verbose: cfg.verbose ?? 1,
     selfHeal: true,
     serverCache: false,
-    model: getAgentModelConfig(cfg),
-  });
-}
-
-function createHackerNewsAgent(
-  stagehand: Stagehand,
-  cfg: HackerNewsScrapeConfig,
-): AgentInstance {
-  return stagehand.agent({
-    mode: "cua",
-    model: getAgentModelConfig(cfg),
-    systemPrompt: buildHackerNewsAgentSystemPrompt(cfg),
+    model: getStagehandModelConfig(cfg),
   });
 }
 
@@ -180,7 +166,7 @@ function resolveHackerNewsOutputPath(cfg: HackerNewsScrapeConfig): string {
   );
 }
 
-function sanitizeAgentMessage(message: string): string {
+function sanitizeStagehandMessage(message: string): string {
   if (!message) return "";
   if (message.includes("<!DOCTYPE html>")) {
     return "Agent call failed with an HTML error response from the model endpoint.";
@@ -212,6 +198,64 @@ function extractEmailFromText(text: string): string | null {
   const normalized = normalizePotentialEmailText(text);
   const match = normalized.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
   return match ? match[0] : null;
+}
+
+function getActivePage(stagehand: Stagehand): HackerNewsPage | null {
+  return stagehand.context.activePage() ?? stagehand.context.pages().at(-1) ?? null;
+}
+
+function toAbsoluteUrlOrNull(
+  href: string | null | undefined,
+  baseUrl: string,
+): string | null {
+  const value = href?.trim();
+  if (!value) return null;
+
+  try {
+    return new URL(value, baseUrl).href;
+  } catch {
+    return null;
+  }
+}
+
+async function actFirstObserved(
+  stagehand: Stagehand,
+  page: HackerNewsPage,
+  candidates: Action[],
+  label: string,
+  timeout: number,
+): Promise<{
+  success: boolean;
+  completed: boolean;
+  message: string;
+  actionCount: number;
+}> {
+  const action = candidates.find((candidate) => candidate.method === "click") ?? candidates[0];
+  if (!action) {
+    return {
+      success: false,
+      completed: false,
+      message: `observe: no action for ${label}`,
+      actionCount: 0,
+    };
+  }
+
+  const result = await stagehand.act(action, { page, timeout });
+
+  return {
+    success: result.success,
+    completed: result.success,
+    message: sanitizeStagehandMessage(result.message || result.actionDescription || label),
+    actionCount: result.actions.length,
+  };
+}
+
+function buildFindCommentsLinkInstruction(title: string): string {
+  return [
+    `Find the Hacker News comments or discuss link for the story titled "${title}".`,
+    "Match the title as closely as possible on the current front page.",
+    "Return the comments link action only, not the story title link.",
+  ].join(" ");
 }
 
 async function fetchCommenterProfiles(
@@ -271,46 +315,28 @@ async function openStoryCommentsPage(
   stagehand: Stagehand,
   page: HackerNewsPage,
   story: HackerNewsFrontPageStory,
-  useAgent: boolean,
 ): Promise<{
   navigationMethod: "agent" | "comments-link";
-  result: Awaited<ReturnType<AgentInstance["execute"]>>;
+  result: {
+    success: boolean;
+    completed: boolean;
+    message: string;
+    actionCount: number;
+  };
 }> {
-  if (!useAgent) {
-    if (!story.commentsPageUrl) {
-      return {
-        navigationMethod: "comments-link",
-        result: {
-          success: false,
-          completed: false,
-          message: "Skipped agent because a prior agent call failed with the current endpoint.",
-          actions: [],
-        },
-      };
-    }
-
-    await page.goto(story.commentsPageUrl, {
-      waitUntil: "domcontentloaded",
-      timeoutMs: 60_000,
-    });
-
-    return {
-      navigationMethod: "comments-link",
-      result: {
-        success: false,
-        completed: false,
-        message: "Skipped agent because a prior agent call failed with the current endpoint.",
-        actions: [],
-      },
-    };
-  }
-
-  const agent = createHackerNewsAgent(stagehand, cfg);
-  const result = await agent.execute({
-    instruction: buildOpenCommentsInstruction(story.title),
-    maxSteps: cfg.maxAgentSteps ?? 8,
+  const observed = await stagehand.observe(buildFindCommentsLinkInstruction(story.title), {
     page,
+    timeout: cfg.observeTimeoutMs ?? 25_000,
   });
+  const result = await actFirstObserved(
+    stagehand,
+    page,
+    observed,
+    `open comments for "${story.title}"`,
+    cfg.observeTimeoutMs ?? 25_000,
+  );
+
+  await page.waitForLoadState("domcontentloaded");
 
   if (isHnCommentsPage(page.url())) {
     return { navigationMethod: "agent", result };
@@ -322,58 +348,60 @@ async function openStoryCommentsPage(
 
   await page.goto(story.commentsPageUrl, {
     waitUntil: "domcontentloaded",
-    timeoutMs: 60_000,
+    timeoutMs: cfg.gotoTimeoutMs ?? 60_000,
   });
 
-  return { navigationMethod: "comments-link", result };
+  return {
+    navigationMethod: "comments-link",
+    result: {
+      ...result,
+      completed: isHnCommentsPage(page.url()),
+      message:
+        result.message ||
+        "Fell back to the extracted comments URL after observe/act did not land on the comments page.",
+    },
+  };
 }
 
 async function readFrontPageStories(
+  stagehand: Stagehand,
   page: HackerNewsPage,
+  cfg: HackerNewsScrapeConfig,
   storyLimit: number,
 ): Promise<HackerNewsFrontPageStory[]> {
-  return await page.evaluate(
-    ({ storyLimit }) => {
-      const rows = Array.from(document.querySelectorAll("tr.athing")).slice(
-        0,
-        storyLimit,
-      );
-
-      return rows.map((row, index) => {
-        const next = row.nextElementSibling as HTMLElement | null;
-        const titleLink = row.querySelector(".titleline a") as HTMLAnchorElement | null;
-        const scoreText = next?.querySelector(".score")?.textContent ?? null;
-        const commentLink = Array.from(next?.querySelectorAll("a") ?? []).find((a) =>
-          /comment|discuss/i.test(a.textContent ?? ""),
-        ) as HTMLAnchorElement | undefined;
-
-        const toAbsolute = (href: string | null | undefined): string | null => {
-          if (!href) return null;
-          return new URL(href, document.location.href).href;
-        };
-
-        const pointsMatch = scoreText?.match(/\d+/);
-        const commentsMatch = (commentLink?.textContent ?? "").match(/\d+/);
-
-        return {
-          rank: index + 1,
-          title: titleLink?.textContent?.trim() ?? `Story ${index + 1}`,
-          storyUrl: toAbsolute(titleLink?.getAttribute("href")),
-          commentsPageUrl: toAbsolute(commentLink?.getAttribute("href")),
-          points: pointsMatch ? Number(pointsMatch[0]) : null,
-          author: next?.querySelector(".hnuser")?.textContent?.trim() ?? null,
-          age: next?.querySelector(".age")?.textContent?.trim() ?? null,
-          commentCount: commentsMatch ? Number(commentsMatch[0]) : null,
-        };
-      });
+  const extracted = await stagehand.extract(
+    [
+      `Extract the first ${storyLimit} visible stories from the Hacker News front page in top-to-bottom order.`,
+      "For each story include the displayed rank, exact title text, absolute story URL, absolute Hacker News comments/discuss URL, visible points, author username, age text, and visible comment count.",
+      "If the comments link only says 'discuss', set commentCount to null.",
+      `Return only the first ${storyLimit} stories.`,
+    ].join(" "),
+    hackerNewsFrontPageStoriesSchema,
+    {
+      page,
+      timeout: cfg.extractTimeoutMs ?? 45_000,
     },
-    { storyLimit },
   );
+
+  const baseUrl = cfg.siteURL ?? "https://news.ycombinator.com/";
+
+  return extracted.stories.slice(0, storyLimit).map((story, index) => ({
+    rank: story.rank || index + 1,
+    title: story.title.trim() || `Story ${index + 1}`,
+    storyUrl: toAbsoluteUrlOrNull(story.storyUrl, baseUrl),
+    commentsPageUrl: toAbsoluteUrlOrNull(story.commentsPageUrl, baseUrl),
+    points: story.points,
+    author: story.author?.trim() || null,
+    age: story.age?.trim() || null,
+    commentCount: story.commentCount,
+  }));
 }
 
 async function readCommentsFromPage(
   page: HackerNewsPage,
 ): Promise<HackerNewsComment[]> {
+  // Keep the bulk comment read deterministic and cheap; Stagehand is used for
+  // page discovery/navigation above, while the DOM parser preserves every row.
   return await page.evaluate(() => {
     return Array.from(document.querySelectorAll("tr.athing.comtr")).map((row) => {
       const depthWidth = Number(
@@ -397,16 +425,15 @@ async function scrapeStoryComments(
   cfg: HackerNewsScrapeConfig,
   stagehand: Stagehand,
   story: HackerNewsFrontPageStory,
-  useAgent: boolean,
 ): Promise<HackerNewsStoryResult> {
-  const page = stagehand.context.pages()[0];
+  const page = getActivePage(stagehand);
   if (!page) {
     throw new Error("No active page available after stagehand.init().");
   }
 
   await page.goto(cfg.siteURL ?? "https://news.ycombinator.com/", {
     waitUntil: "domcontentloaded",
-    timeoutMs: 60_000,
+    timeoutMs: cfg.gotoTimeoutMs ?? 60_000,
   });
 
   const { navigationMethod, result } = await openStoryCommentsPage(
@@ -414,7 +441,6 @@ async function scrapeStoryComments(
     stagehand,
     page,
     story,
-    useAgent,
   );
 
   const resolvedCommentsPageUrl = page.url();
@@ -443,8 +469,8 @@ async function scrapeStoryComments(
     agent: {
       success: result.success,
       completed: result.completed,
-      message: sanitizeAgentMessage(result.message),
-      actionCount: result.actions.length,
+      message: sanitizeStagehandMessage(result.message),
+      actionCount: result.actionCount,
     },
     comments,
     commenters,
@@ -458,31 +484,27 @@ export async function runHackerNewsScrape(): Promise<HackerNewsScrapeOutput> {
 
   try {
     await stagehand.init();
-    const page = stagehand.context.pages()[0];
+    const page = getActivePage(stagehand);
     if (!page) {
       throw new Error("No active page available after stagehand.init().");
     }
 
     await page.goto(cfg.siteURL ?? "https://news.ycombinator.com/", {
       waitUntil: "domcontentloaded",
-      timeoutMs: 60_000,
+      timeoutMs: cfg.gotoTimeoutMs ?? 60_000,
     });
 
-    const topStories = await readFrontPageStories(page, cfg.storyLimit ?? 3);
+    const topStories = await readFrontPageStories(
+      stagehand,
+      page,
+      cfg,
+      cfg.storyLimit ?? 3,
+    );
     const stories: HackerNewsStoryResult[] = [];
-    let useAgent = true;
 
     for (const story of topStories) {
       console.log(`Opening comments for #${story.rank}: ${story.title}`);
-      const storyResult = await scrapeStoryComments(cfg, stagehand, story, useAgent);
-      stories.push(storyResult);
-      if (
-        useAgent &&
-        storyResult.navigationMethod === "comments-link" &&
-        storyResult.agent.message.includes("HTML error response")
-      ) {
-        useAgent = false;
-      }
+      stories.push(await scrapeStoryComments(cfg, stagehand, story));
     }
 
     const output: HackerNewsScrapeOutput = {
