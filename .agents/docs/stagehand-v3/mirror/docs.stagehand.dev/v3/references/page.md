@@ -1,0 +1,1119 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.stagehand.dev/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# page
+
+> Complete API reference for the Stagehand Page object
+
+export const V3Banner = () => null;
+
+<V3Banner />
+
+<CardGroup cols={1}>
+  <Card title="Page" icon="browser" href="/v3/references/page">
+    Learn about the Stagehand Page object and browser navigation
+  </Card>
+</CardGroup>
+
+## Overview
+
+The `page` object is the main interface for interacting with browser pages in Stagehand. It provides standard browser automation capabilities for navigation, interaction, and page inspection.
+
+Access the page object through your Stagehand instance:
+
+```typescript  theme={null}
+const stagehand = new Stagehand({ env: "LOCAL" });
+await stagehand.init();
+const page = stagehand.context.pages()[0];
+```
+
+## Navigation Methods
+
+### goto()
+
+Navigate the page to a URL and wait for a lifecycle state.
+
+```typescript  theme={null}
+await page.goto(url: string, options?: GotoOptions): Promise<Response | null>
+```
+
+Returns a [Response](/v3/references/response) when the navigation produces a network document request, otherwise `null` (e.g. `data:` URLs or same-document navigations).
+
+<ParamField path="url" type="string" required>
+  The URL to navigate to. Can be absolute or relative.
+</ParamField>
+
+<ParamField path="waitUntil" type="LoadState" optional>
+  When to consider navigation succeeded.
+
+  **Options:**
+
+  * `"load"` - Wait for the load event
+  * `"domcontentloaded"` - Wait for DOMContentLoaded event (default)
+  * `"networkidle"` - Wait for network to be idle
+
+  **Default:** `"domcontentloaded"`
+</ParamField>
+
+<ParamField path="timeoutMs" type="number" optional>
+  Maximum time to wait for navigation in milliseconds.
+
+  **Default:** `15000`
+</ParamField>
+
+### reload()
+
+Reload the current page.
+
+```typescript  theme={null}
+await page.reload(options?: ReloadOptions): Promise<Response | null>
+```
+
+Resolves with a [Response](/v3/references/response) for the refreshed document when one is reported, otherwise `null`.
+
+<ParamField path="waitUntil" type="LoadState" optional>
+  When to consider reload complete. See `goto()` for options.
+</ParamField>
+
+<ParamField path="timeoutMs" type="number" optional>
+  Maximum time to wait for reload in milliseconds.
+
+  **Default:** `15000`
+</ParamField>
+
+<ParamField path="ignoreCache" type="boolean" optional>
+  Whether to bypass the browser cache.
+
+  **Default:** `false`
+</ParamField>
+
+### goBack()
+
+Navigate back in browser history.
+
+```typescript  theme={null}
+await page.goBack(options?: NavigationOptions): Promise<Response | null>
+```
+
+Returns a [Response](/v3/references/response) when the history entry triggers a network fetch; otherwise `null`.
+
+<ParamField path="waitUntil" type="LoadState" optional>
+  When to consider navigation complete.
+</ParamField>
+
+<ParamField path="timeoutMs" type="number" optional>
+  Maximum time to wait in milliseconds.
+
+  **Default:** `15000`
+</ParamField>
+
+### goForward()
+
+Navigate forward in browser history.
+
+```typescript  theme={null}
+await page.goForward(options?: NavigationOptions): Promise<Response | null>
+```
+
+Returns a [Response](/v3/references/response) when the navigation loads a new document from the network; otherwise `null`.
+
+<ParamField path="waitUntil" type="LoadState" optional>
+  When to consider navigation complete.
+</ParamField>
+
+<ParamField path="timeoutMs" type="number" optional>
+  Maximum time to wait in milliseconds.
+
+  **Default:** `15000`
+</ParamField>
+
+## Page Information
+
+### url()
+
+Get the current page URL (synchronous).
+
+```typescript  theme={null}
+page.url(): string
+```
+
+**Returns:** The current page URL as a string.
+
+### title()
+
+Get the current page title.
+
+```typescript  theme={null}
+await page.title(): Promise<string>
+```
+
+**Returns:** The page title as a string.
+
+## Interaction Methods
+
+### click()
+
+Click at absolute page coordinates.
+
+```typescript  theme={null}
+await page.click(x: number, y: number, options?: ClickOptions): Promise<string>
+```
+
+**Returns:** A string containing the XPath of the clicked element when `returnXpath` is `true`, otherwise an empty string.
+
+<ParamField path="x" type="number" required>
+  X coordinate in CSS pixels.
+</ParamField>
+
+<ParamField path="y" type="number" required>
+  Y coordinate in CSS pixels.
+</ParamField>
+
+<ParamField path="options" type="object" optional>
+  Optional click configuration.
+
+  <Expandable title="properties">
+    <ParamField path="button" type="string">
+      Mouse button to use: `"left"` | `"right"` | `"middle"`
+
+      Default: `"left"`
+    </ParamField>
+
+    <ParamField path="clickCount" type="number">
+      Number of consecutive clicks.
+
+      Default: `1`
+    </ParamField>
+
+    <ParamField path="returnXpath" type="boolean">
+      If `true`, the returned string contains the XPath of the clicked element. If `false`, returns an empty string.
+
+      Default: `false`
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+### hover()
+
+Hover at absolute page coordinates without clicking.
+
+```typescript  theme={null}
+await page.hover(x: number, y: number, options?: HoverOptions): Promise<string>
+```
+
+**Returns:** A string containing the XPath of the hovered element when `returnXpath` is `true`, otherwise an empty string.
+
+<ParamField path="x" type="number" required>
+  X coordinate in CSS pixels.
+</ParamField>
+
+<ParamField path="y" type="number" required>
+  Y coordinate in CSS pixels.
+</ParamField>
+
+<ParamField path="options" type="object" optional>
+  Optional hover configuration.
+
+  <Expandable title="properties">
+    <ParamField path="returnXpath" type="boolean">
+      If `true`, the returned string contains the XPath of the hovered element. If `false`, returns an empty string.
+
+      Default: `false`
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+### scroll()
+
+Scroll at absolute page coordinates using mouse wheel events.
+
+```typescript  theme={null}
+await page.scroll(x: number, y: number, deltaX: number, deltaY: number, options?: ScrollOptions): Promise<string>
+```
+
+**Returns:** A string containing the XPath of the element at the scroll position when `returnXpath` is `true`, otherwise an empty string.
+
+<ParamField path="x" type="number" required>
+  X coordinate in CSS pixels where the scroll occurs.
+</ParamField>
+
+<ParamField path="y" type="number" required>
+  Y coordinate in CSS pixels where the scroll occurs.
+</ParamField>
+
+<ParamField path="deltaX" type="number" required>
+  Horizontal scroll amount in pixels. Positive values scroll right.
+</ParamField>
+
+<ParamField path="deltaY" type="number" required>
+  Vertical scroll amount in pixels. Positive values scroll down.
+</ParamField>
+
+<ParamField path="options" type="object" optional>
+  Optional scroll configuration.
+
+  <Expandable title="properties">
+    <ParamField path="returnXpath" type="boolean">
+      If `true`, the returned string contains the XPath of the element at the scroll position. If `false`, returns an empty string.
+
+      Default: `false`
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+### dragAndDrop()
+
+Drag from one position to another using mouse events.
+
+```typescript  theme={null}
+const [fromXpath, toXpath] = await page.dragAndDrop(fromX, fromY, toX, toY, options?)
+```
+
+**Returns:** An array of two strings containing the XPaths of the elements at the start and end positions when `returnXpath` is `true`, otherwise empty strings.
+
+<ParamField path="fromX" type="number" required>
+  Starting X coordinate in CSS pixels.
+</ParamField>
+
+<ParamField path="fromY" type="number" required>
+  Starting Y coordinate in CSS pixels.
+</ParamField>
+
+<ParamField path="toX" type="number" required>
+  Ending X coordinate in CSS pixels.
+</ParamField>
+
+<ParamField path="toY" type="number" required>
+  Ending Y coordinate in CSS pixels.
+</ParamField>
+
+<ParamField path="options" type="object" optional>
+  Optional drag configuration.
+
+  <Expandable title="properties">
+    <ParamField path="button" type="string">
+      Mouse button to use: `"left"` | `"right"` | `"middle"`
+
+      Default: `"left"`
+    </ParamField>
+
+    <ParamField path="steps" type="number">
+      Number of intermediate mouse move events during the drag.
+
+      Default: `1`
+    </ParamField>
+
+    <ParamField path="delay" type="number">
+      Delay in milliseconds between intermediate move events.
+
+      Default: `0`
+    </ParamField>
+
+    <ParamField path="returnXpath" type="boolean">
+      If `true`, the returned array contains the XPaths of the elements at the start and end positions. If `false`, returns empty strings.
+
+      Default: `false`
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+### type()
+
+Type text into the page (dispatches keyboard events).
+
+```typescript  theme={null}
+await page.type(text: string, options?: TypeOptions): Promise<void>
+```
+
+<ParamField path="text" type="string" required>
+  The text to type.
+</ParamField>
+
+<ParamField path="options" type="object" optional>
+  Optional typing configuration.
+
+  <Expandable title="properties">
+    <ParamField path="delay" type="number">
+      Delay between key presses in milliseconds.
+    </ParamField>
+
+    <ParamField path="withMistakes" type="boolean">
+      Simulates typing with occasional mistakes and corrections.
+
+      Default: `false`
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+### locator()
+
+Create a locator for querying elements.
+
+```typescript  theme={null}
+page.locator(selector: string): Locator
+```
+
+<ParamField path="selector" type="string" required>
+  CSS selector or XPath for the element.
+</ParamField>
+
+**Returns:** A `Locator` object for interacting with the element.
+
+## Evaluation
+
+### evaluate()
+
+Evaluate JavaScript code in the page context.
+
+```typescript  theme={null}
+await page.evaluate<R, Arg>(
+  pageFunctionOrExpression: string | ((arg: Arg) => R | Promise<R>),
+  arg?: Arg
+): Promise<R>
+```
+
+<ParamField path="pageFunctionOrExpression" type="string | function" required>
+  JavaScript expression as a string or a function to execute in the page context.
+</ParamField>
+
+<ParamField path="arg" type="any" optional>
+  Optional argument to pass to the function.
+</ParamField>
+
+**Returns:** The result of the evaluation (must be JSON-serializable).
+
+## Initialization Scripts
+
+### addInitScript()
+
+Inject JavaScript that runs before any of the page's scripts on every navigation.
+
+```typescript  theme={null}
+await page.addInitScript<Arg>(
+  script: string | { path?: string; content?: string } | ((arg: Arg) => unknown),
+  arg?: Arg,
+): Promise<void>
+```
+
+<ParamField path="script" type="string | { path?: string; content?: string } | (arg: Arg) => unknown" required>
+  Provide the script to inject. Pass raw source, reference a preload file on disk,
+  or supply a function that Stagehand serializes before sending to the browser.
+</ParamField>
+
+<ParamField path="arg" type="Arg" optional>
+  Extra data that is JSON-serialized and passed to your function. Only supported
+  when `script` is a function.
+</ParamField>
+
+This method:
+
+* Runs at document start for the current page (including adopted iframe sessions) on every navigation
+* Reinstalls the script for all future navigations of this page without affecting other pages
+* Mirrors Playwright's `page.addInitScript()` ordering semantics; use  [`context.addInitScript()`](/v3/references/context#addinitscript) to target every page in the context
+
+```typescript  theme={null}
+import { Stagehand } from "@browserbasehq/stagehand";
+
+const stagehand = new Stagehand({ env: "LOCAL" });
+await stagehand.init();
+const context = stagehand.context;
+const page = await context.awaitActivePage();
+
+await page.addInitScript(() => {
+  window.Math.random = () => 42;
+});
+
+await page.goto("https://example.com", { waitUntil: "load" });
+
+const result = await page.evaluate(() => Math.random());
+console.log("Math.random() returned:", result);
+
+// Math.random() returned: 42
+```
+
+## HTTP Headers
+
+### setExtraHTTPHeaders()
+
+Set HTTP headers that will be included in every request made by this page.
+
+```typescript  theme={null}
+await page.setExtraHTTPHeaders(headers: Record<string, string>): Promise<void>
+```
+
+<ParamField path="headers" type="Record<string, string>" required>
+  A plain object of header name–value pairs. All values must be strings.
+</ParamField>
+
+This method:
+
+* Applies the headers to the page's main CDP session and all of its child sessions (e.g. out-of-process iframes)
+* Automatically applies the same headers to any child sessions adopted after calling `setExtraHTTPHeaders()`
+* Calling it again replaces all previously set extra headers (it does not merge)
+* To clear all extra headers, pass an empty object: `await page.setExtraHTTPHeaders({})`
+
+<Note>
+  Headers set via `page.setExtraHTTPHeaders()` are page-scoped. They apply to every network request from this page only, including navigation requests, XHR/fetch calls, and subresource loads. Use [`context.setExtraHTTPHeaders()`](/v3/references/context#setextrahttpheaders) to set headers across all pages in the context.
+</Note>
+
+```typescript  theme={null}
+import { Stagehand } from "@browserbasehq/stagehand";
+
+const stagehand = new Stagehand({ env: "LOCAL" });
+await stagehand.init();
+const page = stagehand.context.pages()[0];
+
+// Set custom headers for all requests from this page
+await page.setExtraHTTPHeaders({
+  "X-Custom-Token": "my-secret-token",
+  "Accept-Language": "en-US",
+});
+
+// All subsequent requests from this page will include these headers
+await page.goto("https://example.com");
+```
+
+## Screenshot
+
+### screenshot()
+
+Capture a screenshot of the page.
+
+```typescript  theme={null}
+await page.screenshot(options?: ScreenshotOptions): Promise<Buffer>
+```
+
+<ParamField path="fullPage" type="boolean" optional>
+  Capture the entire scrollable page instead of just the current viewport.
+
+  **Default:** `false`
+</ParamField>
+
+<ParamField path="clip" type="ScreenshotClip" optional>
+  Limit the capture to the provided rectangle in CSS pixels (`{ x, y, width, height }`).
+  Cannot be combined with `fullPage`.
+</ParamField>
+
+<ParamField path="type" type="'png' | 'jpeg'" optional>
+  Image format for the screenshot.
+
+  **Default:** `"png"`
+</ParamField>
+
+<ParamField path="quality" type="number" optional>
+  JPEG quality (0–100). Only used when `type` is `"jpeg"`.
+</ParamField>
+
+<ParamField path="scale" type="'css' | 'device'" optional>
+  Rendering scale. Use `"css"` for one pixel per CSS pixel, or `"device"` for the
+  device pixel ratio.
+
+  **Default:** `"device"`
+</ParamField>
+
+<ParamField path="animations" type="'allow' | 'disabled'" optional>
+  Control CSS/Web animations and transitions. `"disabled"` fast-forwards finite
+  animations and pauses infinite ones before capture.
+
+  **Default:** `"allow"`
+</ParamField>
+
+<ParamField path="caret" type="hide | initial" optional>
+  Hide the text caret during capture (`"hide"`) or leave it untouched (`"initial"`).
+
+  **Default:** `"hide"`
+</ParamField>
+
+<ParamField path="mask" type="Locator[]" optional>
+  List of locators to cover with a colored overlay while the screenshot is taken.
+</ParamField>
+
+<ParamField path="maskColor" type="string" optional>
+  CSS color to use for masked overlays.
+
+  **Default:** `#FF00FF`
+</ParamField>
+
+<ParamField path="style" type="string" optional>
+  Additional CSS text injected into every frame just before capture. Useful for
+  hiding or tweaking dynamic UI.
+</ParamField>
+
+<ParamField path="omitBackground" type="boolean" optional>
+  Make the default page background transparent (PNG only).
+
+  **Default:** `false`
+</ParamField>
+
+<ParamField path="timeout" type="number" optional>
+  Maximum time in milliseconds to wait for the capture before throwing.
+</ParamField>
+
+<ParamField path="path" type="string" optional>
+  Write the screenshot to the provided file path. The image is still returned as
+  a buffer.
+</ParamField>
+
+**Returns:** A `Promise<Buffer>` containing the screenshot image data.
+
+## Page Snapshot
+
+### snapshot()
+
+Capture a structured accessibility snapshot of the current page. The returned data combines a human-readable accessibility tree with lookup maps so you can relate each node to DOM selectors or URLs.
+
+```typescript  theme={null}
+await page.snapshot(options?: PageSnapshotOptions): Promise<SnapshotResult>
+```
+
+<ParamField path="options" type="PageSnapshotOptions" optional>
+  Optional configuration for the snapshot.
+
+  <Expandable title="properties">
+    <ParamField path="includeIframes" type="boolean">
+      Whether to include iframe content in the snapshot.
+
+      **Default:** `true`
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+**Returns:** A `Promise<SnapshotResult>` describing the captured accessibility tree.
+
+<Expandable title="SnapshotResult properties">
+  <ParamField path="formattedTree" type="string">
+    Multiline text representing the accessibility tree hierarchy with encoded IDs.
+  </ParamField>
+
+  <ParamField path="xpathMap" type="Record<string, string>">
+    Maps each encoded ID to the element's absolute XPath for quick DOM lookups.
+  </ParamField>
+
+  <ParamField path="urlMap" type="Record<string, string>">
+    Maps encoded IDs for link-like nodes to their resolved URLs.
+  </ParamField>
+</Expandable>
+
+See [SnapshotResult](#snapshotresult) for the static type definition.
+
+The formatted tree represents every accessibility node with:
+
+* A unique encoded ID in brackets (e.g., `[0-1]`) for cross-referencing with the maps
+* The node's accessibility role (`RootWebArea`, `heading`, `link`, `button`, etc.)
+* The node's accessible name, when available
+
+**Example formatted output:**
+
+```txt  theme={null}
+[0-1] RootWebArea: Example Domain
+  [0-3] heading: Example Domain
+  [0-5] paragraph: This domain is for use in illustrative examples in documents.
+  [0-8] link: More information...
+```
+
+**Example usage:**
+
+```typescript  theme={null}
+const page = stagehand.context.pages()[0];
+await page.goto("https://example.com");
+
+const { formattedTree, xpathMap, urlMap } = await page.snapshot();
+
+// Print the accessibility tree
+console.log(formattedTree);
+
+// Look up a specific element's XPath by encoded ID
+const linkId = "0-8";
+console.log(xpathMap[linkId]); // e.g., "/html/body/div/p[2]/a"
+
+// Resolve a link's URL via the urlMap
+console.log(urlMap[linkId]); // e.g., "https://www.example.com"
+
+// Exclude iframe content when you only need the main document
+const mainDocumentSnapshot = await page.snapshot({ includeIframes: false });
+```
+
+## Viewport
+
+### setViewportSize()
+
+Set the page viewport size.
+
+```typescript  theme={null}
+await page.setViewportSize(
+  width: number,
+  height: number,
+  options?: ViewportOptions
+): Promise<void>
+```
+
+<ParamField path="width" type="number" required>
+  Viewport width in CSS pixels.
+</ParamField>
+
+<ParamField path="height" type="number" required>
+  Viewport height in CSS pixels.
+</ParamField>
+
+<ParamField path="deviceScaleFactor" type="number" optional>
+  Device scale factor (pixel ratio).
+
+  **Default:** `1`
+</ParamField>
+
+## Wait Methods
+
+### waitForLoadState()
+
+Wait for the page to reach a specific lifecycle state.
+
+```typescript  theme={null}
+await page.waitForLoadState(state: LoadState, timeoutMs?: number): Promise<void>
+```
+
+<ParamField path="state" type="LoadState" required>
+  The lifecycle state to wait for.
+
+  **Options:** `"load"`, `"domcontentloaded"`, `"networkidle"`
+</ParamField>
+
+<ParamField path="timeoutMs" type="number" optional>
+  Maximum time to wait in milliseconds.
+
+  **Default:** `15000`
+</ParamField>
+
+### waitForSelector()
+
+Wait for an element matching the selector to reach a specific state in the DOM. Uses a MutationObserver for efficiency, pierces shadow DOM by default, and supports iframe hops when needed.
+
+```typescript  theme={null}
+await page.waitForSelector(
+  selector: string,
+  options?: {
+    state?: "attached" | "detached" | "visible" | "hidden";
+    timeout?: number;
+    pierceShadow?: boolean;
+  }
+): Promise<boolean>
+```
+
+<ParamField path="selector" type="string" required>
+  CSS selector or XPath expression to wait for. Supports iframe hops (e.g., `/html/div/iframe/html/div/button`).
+</ParamField>
+
+<ParamField path="options" type="object" optional>
+  Optional wait configuration.
+
+  <Expandable title="properties">
+    <ParamField path="state" type="'attached' | 'detached' | 'visible' | 'hidden'">
+      Element state to wait for.
+
+      **Options:**
+
+      * `"attached"` - Element is present in DOM (even if hidden)
+      * `"detached"` - Element is removed from DOM
+      * `"visible"` - Element is visible
+      * `"hidden"` - Element is hidden
+
+      **Default:** `"visible"`
+    </ParamField>
+
+    <ParamField path="timeout" type="number">
+      Maximum time to wait in milliseconds before timing out.
+
+      **Default:** `30000`
+    </ParamField>
+
+    <ParamField path="pierceShadow" type="boolean">
+      Whether to search inside open and closed shadow DOM boundaries.
+
+      **Default:** `true`
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+**Returns:** `true` when the condition is met.
+
+**Throws:** Error if timeout is reached before the condition is met.
+
+## Events
+
+### on("console")
+
+Listen for console output produced by the page and any adopted iframe sessions. Returns the page instance so calls can be chained.
+
+```typescript  theme={null}
+import type { ConsoleMessage } from "@browserbasehq/stagehand";
+
+const handleConsole = (message: ConsoleMessage) => {
+  console.log(`[${message.type()}] ${message.text()}`);
+  console.log("Arguments:", message.args());
+  const location = message.location();
+  if (location?.url) {
+    console.log(`Emitted from ${location.url}:${location.lineNumber ?? 0}`);
+  }
+};
+
+page.on("console", handleConsole);
+```
+
+`ConsoleMessage` exposes helpers for working with console events:
+
+* `message.type()` – console API category such as `log`, `error`, or `warning`
+* `message.text()` – string representation of the console arguments
+* `message.args()` – underlying CDP `RemoteObject` arguments array
+* `message.location()` – source URL, line, and column when available
+* `message.timestamp()` – CDP timestamp for the event
+* `message.raw()` – access to the original `Runtime.consoleAPICalledEvent`
+
+### once("console")
+
+Register a listener that removes itself after the first console event.
+
+```typescript  theme={null}
+page.once("console", (message) => {
+  console.log("First console message:", message.text());
+});
+```
+
+### off("console")
+
+Remove a previously registered listener. The reference must match the original listener passed to `on()`.
+
+```typescript  theme={null}
+page.off("console", handleConsole);
+```
+
+## Code Examples
+
+<Tabs>
+  <Tab title="Basic Navigation">
+    ```typescript  theme={null}
+    import { Stagehand } from "@browserbasehq/stagehand";
+
+    // Initialize with Browserbase (API key and project ID from environment variables)
+    // Set BROWSERBASE_API_KEY and BROWSERBASE_PROJECT_ID in your environment
+    const stagehand = new Stagehand({ env: "BROWSERBASE" });
+    await stagehand.init();
+    const page = stagehand.context.pages()[0];
+
+    // Navigate to a URL
+    await page.goto("https://example.com");
+
+    // Get current URL and title
+    console.log("URL:", page.url());
+    console.log("Title:", await page.title());
+
+    // Navigate back and forward
+    await page.goBack();
+    await page.goForward();
+
+    // Reload the page
+    await page.reload();
+    ```
+  </Tab>
+
+  <Tab title="Screenshots">
+    ```typescript  theme={null}
+    // Capture viewport screenshot
+    const screenshot = await page.screenshot();
+    await fs.writeFile("screenshot.png", screenshot);
+
+    // Capture full page screenshot
+    const fullPage = await page.screenshot({ fullPage: true });
+    await fs.writeFile("fullpage.png", fullPage);
+
+    // Capture JPEG with styling overrides and a masked element
+    const styled = await page.screenshot({
+      type: "jpeg",
+      quality: 80,
+      style: "body { filter: grayscale(1); }",
+      mask: [page.locator(".ads-banner")],
+      maskColor: "rgba(0, 0, 0, 0.3)",
+    });
+    await fs.writeFile("styled.jpg", styled);
+    ```
+  </Tab>
+
+  <Tab title="JavaScript Evaluation">
+    ```typescript  theme={null}
+    // Execute JavaScript expression
+    const pageHeight = await page.evaluate("document.body.scrollHeight");
+    console.log("Page height:", pageHeight);
+
+    // Execute function with arguments
+    const result = await page.evaluate((selector) => {
+      const element = document.querySelector(selector);
+      return element ? element.textContent : null;
+    }, "h1");
+    console.log("H1 text:", result);
+
+    // Async function evaluation
+    const data = await page.evaluate(async () => {
+      const response = await fetch("/api/data");
+      return response.json();
+    });
+    ```
+  </Tab>
+
+  <Tab title="Interaction">
+    ```typescript  theme={null}
+    // Click at coordinates
+    await page.click(100, 200);
+
+    // Double click
+    await page.click(100, 200, { clickCount: 2 });
+
+    // Click and get the XPath of the clicked element
+    const xpath = await page.click(100, 200, { returnXpath: true });
+    console.log("Clicked element xpath:", xpath); // e.g., "/html/body/div[1]/button"
+
+    // Hover at coordinates
+    await page.hover(300, 150);
+
+    // Hover and get the XPath of the hovered element
+    const hoverXpath = await page.hover(300, 150, { returnXpath: true });
+
+    // Scroll down at a position
+    await page.scroll(400, 300, 0, 200); // scroll down 200px
+
+    // Drag and drop between two points
+    const [fromXpath, toXpath] = await page.dragAndDrop(100, 100, 300, 300, { returnXpath: true });
+
+    // Type text
+    await page.type("Hello, World!");
+
+    // Type with delay between keystrokes
+    await page.type("Slow typing", { delay: 100 });
+
+    // Use locator for element interaction
+    const button = page.locator("button.submit");
+    await button.click();
+    ```
+  </Tab>
+
+  <Tab title="Wait for Load">
+    ```typescript  theme={null}
+    // Navigate and wait for full load
+    await page.goto("https://example.com", {
+      waitUntil: "load",
+      timeoutMs: 30000
+    });
+
+    // Wait for network idle after navigation
+    await page.goto("https://spa-app.com", {
+      waitUntil: "networkidle"
+    });
+
+    // Wait for specific load state
+    await page.waitForLoadState("domcontentloaded");
+    ```
+  </Tab>
+
+  <Tab title="Wait for Selector">
+    ```typescript  theme={null}
+    // Wait for element to be visible (default)
+    await page.waitForSelector("#submit-btn");
+
+    // Wait for element to appear with custom timeout
+    await page.waitForSelector(".loading-spinner", {
+      state: "visible",
+      timeout: 10000
+    });
+
+    // Wait for element to be removed from DOM
+    await page.waitForSelector(".loading-spinner", {
+      state: "detached"
+    });
+
+    // Wait for element to become hidden
+    await page.waitForSelector(".modal", {
+      state: "hidden"
+    });
+
+    // Wait for element inside an iframe
+    await page.waitForSelector("iframe#checkout >> .pay-button");
+
+    // Wait for element in shadow DOM (enabled by default)
+    await page.waitForSelector("#shadow-button", {
+      pierceShadow: true
+    });
+
+    // Wait for element with XPath
+    await page.waitForSelector("/html/div/button");
+    ```
+  </Tab>
+
+  <Tab title="Viewport">
+    ```typescript  theme={null}
+    // Set viewport size
+    await page.setViewportSize(1920, 1080);
+
+    // Set mobile viewport with device scale
+    await page.setViewportSize(375, 667, {
+      deviceScaleFactor: 2
+    });
+
+    // Then take a screenshot at this size
+    const screenshot = await page.screenshot();
+    ```
+  </Tab>
+
+  <Tab title="Custom HTTP Headers">
+    ```typescript  theme={null}
+    import { Stagehand } from "@browserbasehq/stagehand";
+
+    const stagehand = new Stagehand({ env: "LOCAL" });
+    await stagehand.init();
+    const page = stagehand.context.pages()[0];
+
+    // Set authorization headers for requests from this page
+    await page.setExtraHTTPHeaders({
+      Authorization: "Bearer my-api-token",
+    });
+
+    // Navigate — the headers are sent with every request from this page
+    await page.goto("https://api.example.com/dashboard");
+
+    // Replace headers (previous headers are removed)
+    await page.setExtraHTTPHeaders({
+      Authorization: "Bearer refreshed-token",
+      "X-Request-Id": "abc-123",
+    });
+
+    // Clear all extra headers
+    await page.setExtraHTTPHeaders({});
+
+    await stagehand.close();
+    ```
+  </Tab>
+
+  <Tab title="Snapshot">
+    ```typescript  theme={null}
+    // Capture the page's accessibility tree snapshot
+    const { formattedTree, xpathMap, urlMap } = await page.snapshot();
+
+    // The formattedTree shows the page structure:
+    // [0-1] RootWebArea: Example Domain
+    //   [0-3] heading: Example Domain
+    //   [0-8] link: More information...
+
+    console.log(formattedTree);
+
+    // Use xpathMap to get the XPath selector for any element by ID
+    const linkXpath = xpathMap["0-8"];
+    console.log("Link XPath:", linkXpath); // "/html/body/div/p[2]/a"
+
+    // Use urlMap to get URLs associated with link elements
+    const linkUrl = urlMap["0-8"];
+    console.log("Link URL:", linkUrl); // "https://www.iana.org/domains/example"
+
+    // Exclude iframe content from the snapshot
+    const mainPageOnly = await page.snapshot({ includeIframes: false });
+    ```
+  </Tab>
+</Tabs>
+
+## Types
+
+### LoadState
+
+```typescript  theme={null}
+type LoadState = "load" | "domcontentloaded" | "networkidle";
+```
+
+* **`"load"`** - Wait for the `load` event (all resources loaded)
+* **`"domcontentloaded"`** - Wait for the `DOMContentLoaded` event (DOM is ready)
+* **`"networkidle"`** - Wait for network connections to be idle
+
+### AnyPage
+
+```typescript  theme={null}
+type AnyPage = PlaywrightPage | PuppeteerPage | PatchrightPage | Page;
+```
+
+Stagehand supports multiple browser automation libraries. The `AnyPage` type represents any compatible page object.
+
+### ScreenshotClip
+
+```typescript  theme={null}
+interface ScreenshotClip {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+```
+
+Represents the CSS-pixel rectangle to capture when `clip` is provided.
+
+### ScreenshotOptions
+
+```typescript  theme={null}
+interface ScreenshotOptions {
+  fullPage?: boolean;
+  clip?: ScreenshotClip;
+  type?: "png" | "jpeg";
+  quality?: number;
+  scale?: "css" | "device";
+  animations?: "allow" | "disabled";
+  caret?: "hide" | "initial";
+  mask?: Locator[];
+  maskColor?: string;
+  style?: string;
+  omitBackground?: boolean;
+  timeout?: number;
+  path?: string;
+}
+```
+
+Matches Playwright's screenshot signature with sensible defaults to control how a
+capture is produced.
+
+### PageSnapshotOptions
+
+```typescript  theme={null}
+type PageSnapshotOptions = {
+  includeIframes?: boolean;
+};
+```
+
+* **`includeIframes`** - Whether to include iframe content in the snapshot. Defaults to `true`
+
+### SnapshotResult
+
+```typescript  theme={null}
+type SnapshotResult = {
+  formattedTree: string;
+  xpathMap: Record<string, string>;
+  urlMap: Record<string, string>;
+};
+```
+
+* **`formattedTree`** - A formatted string representation of the page's accessibility tree with encoded IDs, roles, and names
+* **`xpathMap`** - A mapping from encoded element IDs to their absolute XPath selectors
+* **`urlMap`** - A mapping from encoded element IDs to their associated URLs (for links and other navigable elements)
+
+## Error Handling
+
+Page methods may throw the following errors:
+
+* **Navigation Errors** - Timeout or network issues during navigation
+* **Evaluation Errors** - JavaScript execution errors in `evaluate()`
+* **Interaction Errors** - Failed clicks or typing operations
+* **Screenshot Errors** - Issues capturing screenshots
+
+All errors should be caught and handled appropriately:
+
+```typescript  theme={null}
+try {
+  await page.goto("https://example.com");
+} catch (error) {
+  console.error("Navigation failed:", error.message);
+}
+```
+
+
+Built with [Mintlify](https://mintlify.com).

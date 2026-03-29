@@ -7,7 +7,7 @@ import { Stagehand, type Action, type Page } from "@browserbasehq/stagehand";
 import { z } from "zod";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const monorepoRoot = resolve(here, "../../../../../../../");
+const monorepoRoot = resolve(here, "../../../../");
 
 for (const name of [".env", ".env.local"] as const) {
   const path = resolve(monorepoRoot, name);

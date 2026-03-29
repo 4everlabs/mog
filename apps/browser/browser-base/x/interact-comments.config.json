@@ -1,0 +1,15 @@
+{
+  "env": "LOCAL",
+  "model": "google/gemini-3-flash-preview",
+  "postURL": "https://x.com/traderInosuke/status/2038161279572119706",
+  "maxCommentsToProcess": 20,
+  "maxScrollsWithoutNewComments": 10,
+  "gotoTimeoutMs": 90000,
+  "verbose": 1,
+  "outputPath": "test-output/x-interact-comments.json",
+  "delays": {
+    "afterNavigation": [3000, 6000],
+    "afterAction": [1000, 3000],
+    "afterScroll": [2000, 4000]
+  }
+}

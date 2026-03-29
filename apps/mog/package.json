@@ -13,14 +13,7 @@
     "dev": "bun run index.ts",
     "build": "bun build ./src/index.ts --outdir dist",
     "check": "oxlint",
-    "type-check": "tsc --noEmit",
-    "ig:research": "bun run src/gateway/integrations/browser-base/ig/run-followers-research.ts",
-    "ig:public-test": "bun run src/gateway/integrations/browser-base/ig/run-followers-public-test.ts",
-    "scrape:smoke": "bun run src/gateway/integrations/browser-base/run-scrape-smoke-test.ts",
-    "scrape:blog": "bun run src/gateway/integrations/browser-base/run-blog-scrape-demo.ts",
-    "agent:cua-demo": "bun run src/gateway/integrations/browser-base/run-agent-cua-demo.ts",
-    "browserbase:verify": "bun run src/gateway/integrations/browser-base/verify-browserbase.ts",
-    "mcp:browserbase-cursor": "bun run scripts/print-browserbase-mcp-cursor.ts"
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.48",

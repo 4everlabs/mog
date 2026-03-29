@@ -1,0 +1,14 @@
+{
+  "env": "LOCAL",
+  "model": "google/gemini-3-flash-preview",
+  "siteURL": "https://instagram.com/",
+  "followersFile": "spotlight-la.followers.txt",
+  "offset": 0,
+  "maxProfilesToScrape": 60,
+  "gotoTimeoutMs": 60000,
+  "verbose": 1,
+  "outputPath": "test-output/instagram-scrape-spotlight-la.json",
+  "delays": {
+    "betweenProfiles": [1000, 3000]
+  }
+}

@@ -7,7 +7,7 @@ import { Stagehand, type Action, type Page } from "@browserbasehq/stagehand";
 import { z } from "zod";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const monorepoRoot = resolve(here, "../../../../../../../");
+const monorepoRoot = resolve(here, "../../../../");
 
 for (const name of [".env", ".env.local"] as const) {
   const p = resolve(monorepoRoot, name);
@@ -27,7 +27,6 @@ const OPENROUTER_API_BASE = "https://openrouter.ai/api/v1";
 
 type InstagramSetupConfig = {
   env: "LOCAL";
-  instagramSessionId?: string;
   /** OpenRouter model id, e.g. `google/gemini-3-flash-preview` */
   model: string;
   siteURL: string;
@@ -59,6 +58,10 @@ function openRouterKey(): string {
   const k = process.env.OPENROUTER_API_KEY?.trim();
   if (!k) throw new Error("Missing OPENROUTER_API_KEY.");
   return k;
+}
+
+function readInstagramSessionIdFromEnv(): string | undefined {
+  return process.env.INSTAGRAM_SESSION_ID?.trim() || undefined;
 }
 
 function waitRandomMs([min, max]: [number, number]): Promise<void> {
@@ -148,9 +151,9 @@ export async function runInstagramSetup(): Promise<InstagramSetupOutput> {
     const page = ctx.activePage() ?? ctx.pages().at(-1);
     if (!page) throw new Error("No page after init");
 
-    const sid = cfg.instagramSessionId?.trim();
+    const sid = readInstagramSessionIdFromEnv();
     if (!sid) {
-      console.warn("No instagramSessionId — expect login modals / limited access.");
+      console.warn("Missing INSTAGRAM_SESSION_ID — expect login modals / limited access.");
     } else {
       await ctx.addCookies([
         { name: "sessionid", value: sid, domain: ".instagram.com", path: "/", httpOnly: true, secure: true },

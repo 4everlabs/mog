@@ -1,0 +1,703 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.stagehand.dev/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# context
+
+> Complete API reference for the browser context
+
+export const V3Banner = () => null;
+
+<V3Banner />
+
+<CardGroup cols={1}>
+  <Card title="Stagehand" icon="wand-magic-sparkles" href="/v3/references/stagehand">
+    Learn about the main Stagehand object
+  </Card>
+</CardGroup>
+
+## Overview
+
+The `context` object manages the browser context, which is a container for multiple pages (tabs). It provides methods for creating new pages, accessing existing pages, and managing which page is currently active.
+
+Access the context through your Stagehand instance:
+
+```typescript  theme={null}
+const stagehand = new Stagehand({ env: "BROWSERBASE" });
+await stagehand.init();
+const context = stagehand.context;
+```
+
+## Methods
+
+### newPage()
+
+Create a new page (tab) in the browser.
+
+```typescript  theme={null}
+await context.newPage(url?: string): Promise<Page>
+```
+
+<ParamField path="url" type="string" optional>
+  The URL to navigate to in the new page.
+
+  **Default:** `"about:blank"`
+</ParamField>
+
+**Returns:** `Promise<Page>` - The newly created page object.
+
+The new page is automatically set as the active page.
+
+### pages()
+
+Get all open pages in the browser context.
+
+```typescript  theme={null}
+context.pages(): Page[]
+```
+
+**Returns:** `Page[]` - Array of all open pages, ordered from oldest to newest.
+
+### activePage()
+
+Get the currently active page.
+
+```typescript  theme={null}
+context.activePage(): Page | undefined
+```
+
+**Returns:** `Page | undefined` - The most recently used page, or `undefined` if no pages exist.
+
+The active page is determined by:
+
+1. Most recently interacted with page
+2. Most recently created page if no interaction history
+3. `undefined` if all pages have been closed
+
+### setActivePage()
+
+Set a specific page as the active page.
+
+```typescript  theme={null}
+context.setActivePage(page: Page): void
+```
+
+<ParamField path="page" type="Page" required>
+  The page to set as active. Must be a page that exists in this context.
+</ParamField>
+
+This method:
+
+* Marks the page as most recently used
+* Brings the tab to the foreground (in headed mode)
+* Makes it the default page for subsequent operations
+
+### addInitScript()
+
+Inject JavaScript that runs before any page scripts on every navigation.
+
+```typescript  theme={null}
+await context.addInitScript<Arg>(
+  script: string | { path?: string; content?: string } | ((arg: Arg) => unknown),
+  arg?: Arg,
+): Promise<void>
+```
+
+<ParamField path="script" type="string | { path?: string; content?: string } | (arg: Arg) => unknown" required>
+  Provide the script to inject. Pass raw source code, reference a file on disk,
+  or supply a function that Stagehand serializes before sending to the browser.
+</ParamField>
+
+<ParamField path="arg" type="Arg" optional>
+  Extra data that is JSON-serialized and passed to your function. Only supported
+  when `script` is a function.
+</ParamField>
+
+This method:
+
+* Runs at document start, and installs the script on all currently open pages and replays it on every
+  navigation of those pages
+* Automatically applies the same script to any pages created after calling
+  `context.addInitScript()`
+* Allows referencing preload files via `{ path: "./preloads/dom-hooks.js" }`,
+  mirroring Playwright's `sourceURL` behavior for readable stack traces
+
+```typescript  theme={null}
+import { Stagehand } from "@browserbasehq/stagehand";
+
+const stagehand = new Stagehand({ env: "LOCAL" });
+await stagehand.init();
+const context = stagehand.context;
+
+// Add some JavaScript to automatically accept alert dialogs
+await context.addInitScript(() => {
+   window.alert = () => {};
+   window.confirm = () => true;
+   window.prompt = () => '';
+ });
+```
+
+### setExtraHTTPHeaders()
+
+Set HTTP headers that will be included in every request made by all pages in the browser context.
+
+```typescript  theme={null}
+await context.setExtraHTTPHeaders(headers: Record<string, string>): Promise<void>
+```
+
+<ParamField path="headers" type="Record<string, string>" required>
+  A plain object of header name–value pairs. All values must be strings.
+</ParamField>
+
+This method:
+
+* Applies the headers to all existing pages in the context immediately
+* Automatically applies the same headers to any pages created after calling `setExtraHTTPHeaders()`
+* Calling it again replaces all previously set extra headers (it does not merge)
+* To clear all extra headers, pass an empty object: `await context.setExtraHTTPHeaders({})`
+
+<Note>
+  Headers set via `context.setExtraHTTPHeaders()` are context-wide. They apply to every network request from every page in the context, including navigation requests, XHR/fetch calls, and subresource loads.
+</Note>
+
+```typescript  theme={null}
+import { Stagehand } from "@browserbasehq/stagehand";
+
+const stagehand = new Stagehand({ env: "LOCAL" });
+await stagehand.init();
+const context = stagehand.context;
+
+// Set custom headers for all requests
+await context.setExtraHTTPHeaders({
+  "X-Custom-Token": "my-secret-token",
+  "Accept-Language": "en-US",
+});
+
+// All subsequent requests from any page in this context
+// will include these headers
+const page = await context.newPage("https://example.com");
+```
+
+### cookies()
+
+Retrieve browser cookies, optionally filtered by URL(s).
+
+```typescript  theme={null}
+await context.cookies(urls?: string | string[]): Promise<Cookie[]>
+```
+
+<ParamField path="urls" type="string | string[]" optional>
+  A single URL or array of URLs to filter cookies by. When provided, only cookies that match the domain, path, and secure requirements of the given URLs are returned.
+
+  **Default:** Returns all cookies when omitted.
+</ParamField>
+
+**Returns:** `Promise<Cookie[]>` - Array of cookie objects.
+
+```typescript  theme={null}
+// Get all cookies
+const allCookies = await context.cookies();
+
+// Get cookies for a specific URL
+const siteCookies = await context.cookies("https://example.com");
+
+// Get cookies for multiple URLs
+const cookies = await context.cookies([
+  "https://example.com",
+  "https://api.example.com",
+]);
+```
+
+### addCookies()
+
+Set one or more cookies in the browser context.
+
+```typescript  theme={null}
+await context.addCookies(cookies: CookieParam[]): Promise<void>
+```
+
+<ParamField path="cookies" type="CookieParam[]" required>
+  Array of cookie parameters to set. Each cookie must provide either `url` or both `domain` and `path` — providing both `url` and `domain` (or `url` and `path`) will throw a validation error.
+</ParamField>
+
+<Note>
+  Cookies set via `context.addCookies()` are shared across all pages in the context, scoped by domain and path.
+</Note>
+
+```typescript  theme={null}
+// Set a cookie using a URL
+await context.addCookies([
+  {
+    name: "session",
+    value: "abc123",
+    url: "https://example.com",
+  },
+]);
+
+// Set a cookie using domain and path
+await context.addCookies([
+  {
+    name: "token",
+    value: "xyz789",
+    domain: ".example.com",
+    path: "/",
+    secure: true,
+    httpOnly: true,
+    sameSite: "Strict",
+  },
+]);
+```
+
+<Warning>
+  Setting `sameSite: "None"` requires `secure: true`. Stagehand will throw a validation error if this requirement is not met.
+</Warning>
+
+### clearCookies()
+
+Clear cookies from the browser context. Can clear all cookies or selectively filter by name, domain, or path.
+
+```typescript  theme={null}
+await context.clearCookies(options?: ClearCookieOptions): Promise<void>
+```
+
+<ParamField path="options" type="ClearCookieOptions" optional>
+  Filter options to selectively clear cookies. When omitted, all cookies are cleared.
+
+  <Expandable title="ClearCookieOptions">
+    <ParamField path="name" type="string | RegExp" optional>
+      Match cookies by name. Supports exact string match or RegExp.
+    </ParamField>
+
+    <ParamField path="domain" type="string | RegExp" optional>
+      Match cookies by domain. Supports exact string match or RegExp.
+    </ParamField>
+
+    <ParamField path="path" type="string | RegExp" optional>
+      Match cookies by path. Supports exact string match or RegExp.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+```typescript  theme={null}
+// Clear all cookies
+await context.clearCookies();
+
+// Clear cookies by exact name
+await context.clearCookies({ name: "session" });
+
+// Clear cookies by domain pattern
+await context.clearCookies({ domain: /\.example\.com$/ });
+
+// Combine filters (a cookie must match ALL provided filters to be cleared)
+await context.clearCookies({
+  name: "token",
+  domain: ".example.com",
+});
+```
+
+### close()
+
+Close the browser context and all associated pages.
+
+```typescript  theme={null}
+await context.close(): Promise<void>
+```
+
+This method:
+
+* Closes the CDP connection
+* Cleans up all pages
+* Clears all internal mappings
+
+**Note:** This is typically called internally by `stagehand.close()`. You usually don't need to call this directly.
+
+## Code Examples
+
+<Tabs>
+  <Tab title="Basic Usage">
+    ```typescript  theme={null}
+    import { Stagehand } from "@browserbasehq/stagehand";
+
+    // Initialize with Browserbase (API key and project ID from environment variables)
+    // Set BROWSERBASE_API_KEY and BROWSERBASE_PROJECT_ID in your environment
+    const stagehand = new Stagehand({ env: "BROWSERBASE" });
+    await stagehand.init();
+    const context = stagehand.context;
+
+    // Create a new page
+    const page1 = await context.newPage("https://example.com");
+    console.log("Created page 1");
+
+    // Create another page
+    const page2 = await context.newPage("https://another-site.com");
+    console.log("Created page 2");
+
+    // Get all pages
+    const allPages = context.pages();
+    console.log(`Total pages: ${allPages.length}`);
+
+    await stagehand.close();
+    ```
+  </Tab>
+
+  <Tab title="Multi-Page Workflow">
+    ```typescript  theme={null}
+    import { Stagehand } from "@browserbasehq/stagehand";
+
+    const stagehand = new Stagehand({ env: "LOCAL" });
+    await stagehand.init();
+    const context = stagehand.context;
+
+    // Start with main page
+    const mainPage = context.pages()[0];
+    await mainPage.goto("https://example.com");
+
+    // Open additional pages
+    const dashboardPage = await context.newPage("https://example.com/dashboard");
+    const settingsPage = await context.newPage("https://example.com/settings");
+
+    // Work with specific page
+    context.setActivePage(dashboardPage);
+    await stagehand.act("click the export button");
+
+    // Switch to another page
+    context.setActivePage(settingsPage);
+    await stagehand.act("enable notifications");
+
+    // Back to main page
+    context.setActivePage(mainPage);
+    await stagehand.act("click the logout button");
+
+    await stagehand.close();
+    ```
+  </Tab>
+
+  <Tab title="Page Management">
+    ```typescript  theme={null}
+    import { Stagehand } from "@browserbasehq/stagehand";
+
+    const stagehand = new Stagehand({ env: "LOCAL" });
+    await stagehand.init();
+    const context = stagehand.context;
+
+    // Create multiple pages
+    const pages = await Promise.all([
+      context.newPage("https://site1.com"),
+      context.newPage("https://site2.com"),
+      context.newPage("https://site3.com"),
+    ]);
+
+    console.log(`Opened ${pages.length} pages`);
+
+    // Get the active page
+    const active = context.activePage();
+    console.log(`Active page URL: ${active?.url()}`);
+
+    // Iterate through all pages
+    for (const page of context.pages()) {
+      console.log(`Page URL: ${page.url()}`);
+      console.log(`Page title: ${await page.title()}`);
+    }
+
+    await stagehand.close();
+    ```
+  </Tab>
+
+  <Tab title="Parallel Operations">
+    ```typescript  theme={null}
+    import { Stagehand } from "@browserbasehq/stagehand";
+    import { z } from "zod";
+
+    const stagehand = new Stagehand({ env: "LOCAL" });
+    await stagehand.init();
+    const context = stagehand.context;
+
+    // Create pages for different sites
+    const page1 = await context.newPage("https://site1.com");
+    const page2 = await context.newPage("https://site2.com");
+    const page3 = await context.newPage("https://site3.com");
+
+    const schema = z.object({
+      title: z.string(),
+      description: z.string()
+    });
+
+    // Extract data from all pages in parallel
+    const results = await Promise.all([
+      stagehand.extract("get page info", schema, { page: page1 }),
+      stagehand.extract("get page info", schema, { page: page2 }),
+      stagehand.extract("get page info", schema, { page: page3 })
+    ]);
+
+    console.log("Extracted data:", results);
+
+    await stagehand.close();
+    ```
+  </Tab>
+
+  <Tab title="Active Page Tracking">
+    ```typescript  theme={null}
+    import { Stagehand } from "@browserbasehq/stagehand";
+
+    const stagehand = new Stagehand({ env: "LOCAL" });
+    await stagehand.init();
+    const context = stagehand.context;
+
+    // Create pages
+    const homePage = await context.newPage("https://example.com");
+    const aboutPage = await context.newPage("https://example.com/about");
+    const contactPage = await context.newPage("https://example.com/contact");
+
+    // The last created page (contactPage) is now active
+    console.log("Active:", context.activePage()?.url());
+    // Output: "https://example.com/contact"
+
+    // Switch to home page
+    context.setActivePage(homePage);
+    console.log("Active:", context.activePage()?.url());
+    // Output: "https://example.com"
+
+    // Now act on the active page (homePage)
+    await stagehand.act("click the header link");
+
+    await stagehand.close();
+    ```
+  </Tab>
+
+  <Tab title="Custom HTTP Headers">
+    ```typescript  theme={null}
+    import { Stagehand } from "@browserbasehq/stagehand";
+
+    const stagehand = new Stagehand({ env: "LOCAL" });
+    await stagehand.init();
+    const context = stagehand.context;
+
+    // Set authorization headers for all requests
+    await context.setExtraHTTPHeaders({
+      Authorization: "Bearer my-api-token",
+    });
+
+    // Navigate — the headers are sent with every request
+    const page = context.pages()[0];
+    await page.goto("https://api.example.com/dashboard");
+
+    // Headers also apply to new pages
+    const page2 = await context.newPage("https://api.example.com/settings");
+
+    // Replace headers (previous headers are removed)
+    await context.setExtraHTTPHeaders({
+      Authorization: "Bearer refreshed-token",
+      "X-Request-Id": "abc-123",
+    });
+
+    await stagehand.close();
+    ```
+  </Tab>
+
+  <Tab title="Cookie Management">
+    ```typescript  theme={null}
+    import { Stagehand } from "@browserbasehq/stagehand";
+
+    const stagehand = new Stagehand({ env: "LOCAL" });
+    await stagehand.init();
+    const context = stagehand.context;
+    const page = context.pages()[0];
+
+    await page.goto("https://example.com");
+
+    // Set authentication cookies
+    await context.addCookies([
+      {
+        name: "session_id",
+        value: "abc123",
+        domain: ".example.com",
+        path: "/",
+        httpOnly: true,
+        secure: true,
+        sameSite: "Lax",
+      },
+    ]);
+
+    // Read cookies back
+    const cookies = await context.cookies("https://example.com");
+    console.log("Cookies:", cookies);
+
+    // Clear specific cookies
+    await context.clearCookies({ name: "session_id" });
+
+    // Clear all cookies
+    await context.clearCookies();
+
+    await stagehand.close();
+    ```
+  </Tab>
+</Tabs>
+
+## Working with Active Pages
+
+The context tracks which page is currently active:
+
+```typescript  theme={null}
+const stagehand = new Stagehand({ env: "LOCAL" });
+await stagehand.init();
+
+// Get the current active page
+const activePage = stagehand.context.activePage();
+
+// Create a new page - it becomes active
+const newPage = await stagehand.context.newPage();
+
+// Now context.activePage() returns newPage
+await newPage.goto("https://example.com");
+```
+
+## Relationship Between Context and Page
+
+* **Context** manages the browser-level state and multiple pages
+* **Page** represents a single tab/window with content
+* Creating a new page via `context.newPage()` automatically sets it as active
+* You can explicitly control the active page with `context.setActivePage()`
+* Use `context.activePage()` to get the currently active page
+
+```typescript  theme={null}
+// Get the active page
+const activePage = stagehand.context.activePage();
+
+// Or get the first page directly
+const firstPage = stagehand.context.pages()[0];
+```
+
+## Best Practices
+
+1. **Create pages explicitly** - Use `context.newPage()` instead of relying on popups or window\.open
+2. **Track page references** - Store page objects in variables for easier management
+3. **Set active page before operations** - Ensure the correct page is active before calling Stagehand methods
+4. **Clean up properly** - Call `stagehand.close()` to close all pages and the context
+5. **Handle page order** - Remember that `context.pages()` returns pages in creation order
+6. **Use parallel operations** - Work with multiple pages simultaneously for better performance
+
+## Common Patterns
+
+### Tab Management
+
+```typescript  theme={null}
+// Keep track of pages by purpose
+const pages = {
+  home: await context.newPage("https://example.com"),
+  dashboard: await context.newPage("https://example.com/dashboard"),
+  settings: await context.newPage("https://example.com/settings")
+};
+
+// Switch between tabs
+context.setActivePage(pages.dashboard);
+await stagehand.act("view report");
+
+context.setActivePage(pages.settings);
+await stagehand.act("update preferences");
+```
+
+### Bulk Data Collection
+
+```typescript  theme={null}
+const urls = [
+  "https://site1.com",
+  "https://site2.com",
+  "https://site3.com"
+];
+
+// Open all pages
+const pages = await Promise.all(
+  urls.map(url => context.newPage(url))
+);
+
+// Extract data from each
+const data = await Promise.all(
+  pages.map(page => stagehand.extract("get data", schema, { page }))
+);
+```
+
+### Conditional Page Management
+
+```typescript  theme={null}
+// Only create a page if needed
+if (needsDashboard) {
+  const dashboard = await context.newPage("https://example.com/dashboard");
+  context.setActivePage(dashboard);
+  await stagehand.act("generate report");
+}
+
+// Check if we have multiple pages
+if (context.pages().length > 1) {
+  console.log("Multiple tabs open");
+}
+```
+
+## Error Handling
+
+Context methods may throw the following errors:
+
+* **Timeout errors** - `newPage()` timeout waiting for page to attach
+* **CDP errors** - Connection errors with Chrome DevTools Protocol
+* **Invalid page errors** - Attempting to set an active page that doesn't exist in the context
+* **StagehandSetExtraHTTPHeadersError** - `setExtraHTTPHeaders()` failed to apply headers to one or more sessions. The error includes a `failures` array with per-session details
+
+Always handle errors appropriately:
+
+```typescript  theme={null}
+try {
+  const page = await context.newPage("https://example.com");
+} catch (error) {
+  console.error("Failed to create page:", error.message);
+}
+```
+
+## Type Definitions
+
+```typescript  theme={null}
+interface V3Context {
+  newPage(url?: string): Promise<Page>;
+  pages(): Page[];
+  activePage(): Page | undefined;
+  setActivePage(page: Page): void;
+  setExtraHTTPHeaders(headers: Record<string, string>): Promise<void>;
+  cookies(urls?: string | string[]): Promise<Cookie[]>;
+  addCookies(cookies: CookieParam[]): Promise<void>;
+  clearCookies(options?: ClearCookieOptions): Promise<void>;
+  close(): Promise<void>;
+}
+
+interface Cookie {
+  name: string;
+  value: string;
+  domain: string;
+  path: string;
+  /** Unix time in seconds. -1 means session cookie. */
+  expires: number;
+  httpOnly: boolean;
+  secure: boolean;
+  sameSite: "Strict" | "Lax" | "None";
+}
+
+interface CookieParam {
+  name: string;
+  value: string;
+  /** If provided, domain/path/secure are derived from this URL. */
+  url?: string;
+  domain?: string;
+  path?: string;
+  /** Unix timestamp in seconds. -1 or omitted = session cookie. */
+  expires?: number;
+  httpOnly?: boolean;
+  secure?: boolean;
+  sameSite?: "Strict" | "Lax" | "None";
+}
+
+interface ClearCookieOptions {
+  name?: string | RegExp;
+  domain?: string | RegExp;
+  path?: string | RegExp;
+}
+```
+
+
+Built with [Mintlify](https://mintlify.com).

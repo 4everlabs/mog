@@ -1,0 +1,15 @@
+{
+  "env": "LOCAL",
+  "model": "google/gemini-3-flash-preview",
+  "siteURL": "https://instagram.com/",
+  "maxLikes": 50,
+  "maxScrollsWithoutLike": 20,
+  "gotoTimeoutMs": 90000,
+  "verbose": 1,
+  "outputPath": "test-output/instagram-like.json",
+  "delays": {
+    "afterNavigation": [3000, 6000],
+    "afterLike": [2000, 4000],
+    "afterScroll": [2000, 4000]
+  }
+}

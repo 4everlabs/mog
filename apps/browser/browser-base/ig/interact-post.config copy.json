@@ -1,0 +1,30 @@
+{
+  "env": "LOCAL",
+  "model": "google/gemini-3-flash-preview",
+  "siteURL": "https://instagram.com/",
+  "accountsToInteract": [
+    "mzmoneymagnet",
+    "blkqueen910",
+    "purposedrive_n",
+    "moralesblanca47",
+    "leilani1123",
+    "virmamiya",
+    "mary_wit_tha_lambs",
+    "hassantv333",
+    "i_am_da_light",
+    "elisabethy.grigsby",
+    "izzovashley_",
+    "brateewildin"
+  ],
+  "profilesFile": "xocloudnine.followers.txt",
+  "maxProfilesToProcess": 12,
+  "gotoTimeoutMs": 90000,
+  "verbose": 1,
+  "outputPath": "test-output/instagram-interact-post.json",
+  "delays": {
+    "afterNavigation": [2500, 6000],
+    "afterStoryOpen": [2000, 4500],
+    "betweenActions": [1200, 3000],
+    "betweenProfiles": [3000, 7000]
+  }
+}

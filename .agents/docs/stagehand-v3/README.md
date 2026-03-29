@@ -1,21 +1,23 @@
-## Stagehand v3 Local Notes
+## Stagehand v3 Local Docs
 
-Fetched from official Browserbase / Stagehand docs for the Hacker News scraper migration.
+This folder now contains both:
 
-Sources:
-- `https://docs.stagehand.dev/llms.txt`
-- `https://docs.stagehand.dev/v3/references/act.md`
-- `https://docs.stagehand.dev/v3/references/observe.md`
-- `https://docs.stagehand.dev/v3/references/extract.md`
-- `https://docs.stagehand.dev/v3/migrations/v2.md`
-- `https://docs.browserbase.com/guides/stagehand-crash-course`
+- hand-written local notes for the Hacker News migration
+- a markdown-only mirror of the Stagehand docs pages from `docs.stagehand.dev`
 
-Saved files:
-- `core-primitives.md`
-- `migration-notes.md`
+Primary files:
 
-Why these were saved:
-- `observe()` is the right primitive for locating the HN comments link.
-- `act()` is the right primitive for executing that single click deterministically.
-- `extract()` is the right primitive for turning the front page into structured story data.
-- `agent()` is better reserved for open-ended, unknown, or multi-step workflows.
+- `INDEX.md` generated manifest for the mirror
+- `llms.txt` raw Stagehand documentation index
+- `core-primitives.md` local notes on `observe()`, `act()`, `extract()`, and `agent()`
+- `migration-notes.md` local notes for the v2 -> v3 migration
+
+Mirrored docs live under:
+
+- `mirror/docs.stagehand.dev/...`
+
+Notes:
+
+- Only markdown docs pages are mirrored.
+- External links from `llms.txt` like GitHub, Discord, Mintlify, app examples, and the OpenAPI spec are intentionally not stored here.
+- The mirror currently contains 87 markdown docs pages from `docs.stagehand.dev`.

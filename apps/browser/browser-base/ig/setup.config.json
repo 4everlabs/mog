@@ -1,0 +1,15 @@
+{
+  "env": "LOCAL",
+  "model": "google/gemini-3-flash-preview",
+  "siteURL": "https://instagram.com/",
+  "targetUsername": "laylamarigold",
+  "targetFollowersCount": 25,
+  "maxScrollAttempts": 40,
+  "delays": {
+    "initialWait": [3000, 9000],
+    "scroll": [2500, 8000]
+  },
+  "gotoTimeoutMs": 200000,
+  "verbose": 1,
+  "outputPath": "test-output/instagram-setup.json"
+}

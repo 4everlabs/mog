@@ -1,0 +1,235 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.stagehand.dev/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Caching Actions
+
+> Cache actions automatically to reduce costs and improve performance
+
+export const V3Banner = () => null;
+
+<V3Banner />
+
+Stagehand supports two caching strategies to reduce LLM costs and speed up your automations: **Browserbase Cache** and **Local Cache**. They serve different use cases and can be used independently or together.
+
+***
+
+## Browserbase Cache
+
+Browserbase Cache is a managed, server-side caching layer built into the Stagehand API. When you run Stagehand with `env: "BROWSERBASE"`, every `act()` call is automatically cached on Browserbase's servers. Repeated calls with the same inputs return instantly without consuming any LLM tokens. You don't need to configure anything to start benefiting.
+
+The cache key is generated from the instruction, page content, and options you pass. On a cache hit, the response is returned directly from the server with no LLM inference and no token cost. You can inspect cache behavior via the `cacheStatus` field returned by `act()`. Check out the [Browserbase blog](https://www.browserbase.com/blog/stagehand-caching) for more details on how it works under the hood.
+
+### Disabling on the Constructor
+
+Pass `serverCache: false` to disable caching for all requests made by that instance:
+
+```typescript  theme={null}
+import { Stagehand } from "@browserbasehq/stagehand";
+
+const stagehand = new Stagehand({
+  env: "BROWSERBASE",
+  serverCache: false,
+});
+
+await stagehand.init();
+const page = stagehand.context.pages()[0];
+
+await page.goto("https://example.com");
+
+// Cache is disabled, always hits the LLM
+await stagehand.act("click the login button");
+```
+
+### Disabling per Call
+
+Override the instance setting for a single call by passing `serverCache: false` in the options:
+
+```typescript  theme={null}
+import { Stagehand } from "@browserbasehq/stagehand";
+
+const stagehand = new Stagehand({ env: "BROWSERBASE" }); // caching on by default
+
+await stagehand.init();
+const page = stagehand.context.pages()[0];
+await page.goto("https://example.com");
+
+// This call skips the cache
+await stagehand.act("click the login button", { serverCache: false });
+
+// This call uses the cache as normal
+await stagehand.act("submit the form");
+```
+
+### Inspecting Cache Status
+
+`act()` returns a `cacheStatus` field you can use to verify whether a result was served from cache:
+
+```typescript  theme={null}
+const actResult = await stagehand.act("click the login button");
+console.log(actResult.cacheStatus); // "HIT" or "MISS"
+```
+
+### Limitations
+
+* The page URL factors in to the cache key. If the action is being made on a page with a dynamic URL, caching may not work as expected. We do filter out certain query parameters like referral trackers and analytics, but we don't catch everything just yet.
+* If the page content or structure changes, the action won't get a cache `HIT` and the LLM will be called. The subsequent actions will attempt to hit the resulting cache entry.
+
+***
+
+## Local Cache
+
+Local Cache writes action results to your filesystem so they persist across script runs. It works in both `LOCAL` and `BROWSERBASE` environments. When you specify a `cacheDir`, Stagehand saves every action and agent step to a local file on first run, then replays those cached actions on subsequent runs with no LLM calls, no token cost, and no network round-trip to Browserbase.
+
+This is especially useful for:
+
+* **CI/CD pipelines** - commit your cache directory to version control for consistent, deterministic runs across environments
+* **Local development** - iterate on automations without burning tokens on repeated runs
+* **Cross-machine sharing** - cache files are portable and can be shared across machines
+
+### Caching with `act()`
+
+Cache actions from `act()` by specifying a cache directory in your Stagehand constructor.
+
+```typescript  theme={null}
+import { Stagehand } from "@browserbasehq/stagehand";
+
+const stagehand = new Stagehand({
+  env: "BROWSERBASE",
+  cacheDir: "act-cache", // Specify a cache directory
+});
+
+await stagehand.init();
+const page = stagehand.context.pages()[0];
+
+await page.goto("https://browserbase.github.io/stagehand-eval-sites/sites/iframe-same-proc-scroll/");
+
+// First run: uses LLM inference and caches
+// Subsequent runs: reuses cached action
+await stagehand.act("scroll to the bottom of the iframe");
+
+// Variables work with caching too
+await stagehand.act("fill the username field with %username%", {
+  variables: {
+    username: "fakeUsername",
+  },
+});
+```
+
+### Caching with `agent()`
+
+Cache agent actions (including Computer Use Agent actions) the same way. Just specify a `cacheDir`. The cache key is automatically generated based on the instruction, start URL, agent execution options, and agent configuration. Subsequent runs with the same parameters will reuse cached actions.
+
+```typescript  theme={null}
+import { Stagehand } from "@browserbasehq/stagehand";
+
+const stagehand = new Stagehand({
+  env: "BROWSERBASE",
+  cacheDir: "agent-cache", // Specify a cache directory
+});
+
+await stagehand.init();
+const page = stagehand.context.pages()[0];
+
+await page.goto("https://browserbase.github.io/stagehand-eval-sites/sites/drag-drop/");
+
+const agent = stagehand.agent({
+  mode: "cua",
+  model: {
+    modelName: "google/gemini-2.5-computer-use-preview-10-2025",
+    apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY
+  },
+  systemPrompt: "You are a helpful assistant that can use a web browser.",
+});
+
+await page.goto("https://play2048.co/");
+
+// First run: uses LLM inference and caches
+// Subsequent runs: reuses cached actions
+const result = await agent.execute({
+  instruction: "play a game of 2048",
+  maxSteps: 20,
+});
+
+console.log(JSON.stringify(result, null, 2));
+```
+
+### Cache Directory Organization
+
+You can organize your caches by using different directory names for different workflows:
+
+```typescript  theme={null}
+// Separate caches for different parts of your automation
+const loginStagehand = new Stagehand({
+  env: "BROWSERBASE",
+  cacheDir: "cache/login-flow"
+});
+
+const checkoutStagehand = new Stagehand({
+  env: "BROWSERBASE",
+  cacheDir: "cache/checkout-flow"
+});
+
+const dataExtractionStagehand = new Stagehand({
+  env: "BROWSERBASE",
+  cacheDir: "cache/data-extraction"
+});
+```
+
+### Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use descriptive cache directories">
+    Organize caches by workflow or feature for easier management:
+
+    ```typescript  theme={null}
+    // Good: descriptive cache names
+    cacheDir: "cache/login-actions"
+    cacheDir: "cache/search-actions"
+    cacheDir: "cache/form-submissions"
+
+    // Avoid: generic cache names
+    cacheDir: "cache"
+    cacheDir: "my-cache"
+    ```
+  </Accordion>
+
+  <Accordion title="Clear cache when DOM changes">
+    If the website structure changes significantly, clear your cache directory to force fresh inference:
+
+    ```bash  theme={null}
+    rm -rf cache/login-actions
+    ```
+
+    Or programmatically:
+
+    ```typescript  theme={null}
+    import { rmSync } from 'fs';
+
+    // Clear cache before running if needed
+    if (shouldClearCache) {
+      rmSync('cache/login-actions', { recursive: true, force: true });
+    }
+
+    const stagehand = new Stagehand({
+      env: "BROWSERBASE",
+      cacheDir: "cache/login-actions"
+    });
+    ```
+  </Accordion>
+
+  <Accordion title="Commit cache for CI/CD">
+    Consider committing your cache directory to version control for consistent behavior across environments:
+
+    ```gitignore  theme={null}
+    # .gitignore
+    # Don't ignore cache directories
+    !cache/
+    ```
+
+    This ensures your CI/CD pipelines use the same cached actions without needing to run inference on first execution.
+  </Accordion>
+</AccordionGroup>
+
+
+Built with [Mintlify](https://mintlify.com).

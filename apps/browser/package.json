@@ -1,0 +1,32 @@
+{
+  "name": "@mog/browser",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "ig:research": "bun run browser-base/ig/run-followers-research.ts",
+    "ig:interact": "bun run browser-base/ig/interact.ts",
+    "ig:like": "bun run browser-base/ig/like.ts",
+    "ig:public-test": "bun run browser-base/ig/run-followers-public-test.ts",
+    "x:comments": "bun run browser-base/x/interact-comments.ts",
+    "scrape:smoke": "bun run browser-base/run-scrape-smoke-test.ts",
+    "scrape:blog": "bun run browser-base/run-blog-scrape-demo.ts",
+    "agent:cua-demo": "bun run browser-base/run-agent-cua-demo.ts",
+    "browserbase:verify": "bun run browser-base/verify-browserbase.ts"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^3.0.48",
+    "@browserbasehq/sdk": "^2.9.0",
+    "@browserbasehq/stagehand": "^3.2.0",
+    "@openrouter/ai-sdk-provider": "^2.3.3",
+    "ai": "^6.0.141",
+    "dotenv": "^17.3.1",
+    "playwright": "^1.58.2",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "latest",
+    "typescript": "^6.0.2"
+  }
+}
