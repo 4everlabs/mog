@@ -1,0 +1,16 @@
+{
+  "env": "LOCAL",
+  "model": "google/gemini-3-flash-preview",
+  "siteURL": "https://instagram.com/",
+  "targetAccount": "storyworth",
+  "maxPostsToCheck": 10,
+  "maxCommentersPerPost": 20,
+  "gotoTimeoutMs": 90000,
+  "verbose": 1,
+  "outputPath": "apps/browser/browser-base/ig/storyworth-commenters.txt",
+  "delays": {
+    "afterNavigation": [4000, 8000],
+    "afterPostOpen": [3000, 6000],
+    "betweenPosts": [4000, 9000]
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "env": "LOCAL",
+  "model": "google/gemini-3-flash-preview",
+  "siteURL": "https://instagram.com/",
+  "targetAccounts": [
+    "styledinteriors_",
+    "koby_gordon",
+    "taraogrady123",
+    "ricolaaaaaaa",
+    "dr_schaweetness"
+  ],
+  "maxFollowersPerAccount": 200,
+  "gotoTimeoutMs": 90000,
+  "verbose": 1,
+  "outputPath": "apps/browser/browser-base/ig/followers-output.txt",
+  "delays": {
+    "afterNavigation": [4000, 8000],
+    "afterModalOpen": [3000, 6000],
+    "betweenScrolls": [1500, 3500],
+    "betweenAccounts": [5000, 10000]
+  }
+}
