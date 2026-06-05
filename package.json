@@ -9,7 +9,7 @@
   "private": true,
   "scripts": {
     "update-all": "bun run ./scripts/update-all.ts",
-    "demo:browserbase": "cd apps/mog && bun run scrape:blog"
+    "demo:browserbase": "cd apps/browser && bun run hn:scrape"
   },
   "devDependencies": {
     "@types/bun": "^1.3.11",

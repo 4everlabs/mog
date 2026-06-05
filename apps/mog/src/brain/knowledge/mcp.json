@@ -2,7 +2,7 @@
   "mcpServers": {
     "browserbase-mog": {
       "command": "bun",
-      "args": ["run", "./scripts/browserbase-mcp-launch.ts"]
+      "args": ["run", "./apps/browser/browser-base/mcp/browserbase-mcp-launch.ts"]
     }
   }
 }
